@@ -46,3 +46,48 @@ Stage Summary:
 - **HTTPS working**: busybeds.com and www.busybeds.com with Let's Encrypt SSL
 - **Auto-deploy working**: GitHub webhook → deploy script → Docker rebuild
 - **Webhook service**: Running as systemd service (busybeds-webhook.service), auto-restarts
+---
+Task ID: 1-6
+Agent: Main Agent
+Task: Redesign Hotels admin page - integrate Google Places import, bulk import, photo download to server, category/tier/region selection
+
+Work Log:
+- Removed "Import Hotels" from admin sidebar menu (layout.tsx)
+- Added `region` field to Prisma Hotel schema
+- Updated googlePlaces.ts to support pagination (up to 60 results via 3 pages)
+- Created bulk-import API endpoint (/api/admin/hotels/bulk-import/route.ts)
+  - Downloads Google photos directly to server /public/uploads/hotels/
+  - Supports bulk import of up to 60 hotels at once
+  - Auto-detects region from country/city
+  - Each hotel can have its own tier and category
+- Created photo download API endpoint (/api/admin/hotels/download-photos/route.ts)
+  - Downloads photos from Google Places and saves to server filesystem
+  - No CDN dependency - photos are stored locally
+- Redesigned Hotels admin page (/app/admin/hotels/page.tsx) with:
+  - "Import from Google" button next to "+Add Hotel" button
+  - Import view with search panel (query, city, region)
+  - Default tier (Standard/Premium/Luxury) and category (Hotel/Villa/BnB/Apartment/Lodge/Resort) selectors
+  - Grid of search results with photo thumbnails
+  - Select all / deselect all functionality
+  - Per-hotel tier and category selection in search results
+  - Bulk import button with progress indicator
+  - Category and tier badges with icons in hotel list
+  - Region auto-detection when adding hotels manually
+  - Partnership status includes "LISTING_ONLY" option
+- Updated admin hotels API to support category filter and category/region in POST/PUT
+- Updated types/index.ts to add region field and fix duplicate phone/address
+- Redirected old /admin/hotels/import page to /admin/hotels?view=import
+- Added busybeds-uploads volume to docker-compose.yml for persistent photos
+- Added public/uploads/ to .dockerignore
+- Pushed to GitHub and deployed to VPS
+- Verified site is live and healthy at https://busybeds.com
+
+Stage Summary:
+- Import Hotels feature fully integrated into Hotels page
+- Google Places search supports up to 60 results
+- Bulk import with select all/few and import at once
+- Photos downloaded directly to server (no CDN dependency)
+- Category selection (Hotel, Villa, BnB, Apartment, Lodge, Resort)
+- Tier selection (Standard, Premium, Luxury) with visual icons
+- Region auto-detection based on country/city
+- VPS deployed and running at busybeds.com
