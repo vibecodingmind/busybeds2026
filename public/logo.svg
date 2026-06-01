@@ -1,29 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 30 30" style="enable-background:new 0 0 30 30;" xml:space="preserve">
-<defs>
-  <style type="text/css">
-    .st194{fill:#2D2D2D;stroke:#FFFFFF;stroke-width:0.6317;stroke-miterlimit:10;}
-    .st23{fill:#FFFFFF;}
-
-    .z-breathe {
-      animation: breathe 2.5s ease-in-out infinite;
-    }
-
-    @keyframes breathe {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
-    }
-  </style>
-</defs>
-
-<g>
-  <path class="st194" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03
-    C28.51,26.72,26.72,28.51,24.51,28.51z"/>
-  <g class="z-breathe">
-    <path class="st23" d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
-    <polygon class="st23" points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
-    <path class="st23" d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
-  </g>
-</g>
-</svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg fill="none" version="1.1" viewBox="0 0 340 80" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+ <!-- CIRCLE BADGE -->
+ <!-- House icon &#8212; white, modern, centred in circle -->
+ <!-- Door -->
+ <!-- Left window -->
+ <!-- Right window -->
+ <!-- WORDMARK --><text x="75.443253" y="58.435081" fill="#ea4d60" font-family="Comfortaa" font-size="50.987px" font-weight="bold" stroke-width="4.2489" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal" xml:space="preserve"><tspan x="75.443253" y="58.435081" font-family="Comfortaa" font-size="50.987px" font-weight="bold" stroke-width="4.2489" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal">busy<tspan fill="#ea4d60">b</tspan><tspan fill="#ea4d60" font-family="Comfortaa" font-size="50.987px" font-weight="bold" stroke-width="4.2489" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal">eds</tspan></tspan></text><g><path d="m19.9 69.863c-2.5734-0.38041-5.1341-1.6161-7.1312-3.4414-1.6178-1.4786-3.0849-3.9696-3.7376-6.3462l-0.33232-1.2101-0.0381-13.47c-0.0261-9.2153 4e-3 -13.791 0.0958-14.488 0.39195-2.9819 1.6188-5.469 3.7473-7.5969 1.0055-1.0052 2.069-1.7567 11.076-7.8266 5.4801-3.6931 10.194-6.8309 10.476-6.9729 2.1277-1.0732 3.7131-1.4368 6.1921-1.42 1.6439 0.0112 2.0758 0.0578 3.1338 0.33826 1.9849 0.52615 3.2765 1.2707 9.4746 5.4617 3.1798 2.1501 7.5805 5.1221 9.7793 6.6044 3.3373 2.2498 4.1814 2.8795 5.1088 3.8111 2.1361 2.1457 3.357 4.6212 3.7486 7.6009 0.0916 0.69689 0.12185 5.2729 0.0958 14.488l-0.0381 13.47-0.33233 1.2101c-1.3048 4.7512-4.7695 8.2143-9.5326 9.5285l-1.2027 0.33184-19.928 0.0174c-10.96 0.0096-20.255-0.03101-20.655-0.09016z" fill="#ea4d60"/><text x="39.867851" y="60.752583" fill="#ffffff" font-family="Comfortaa" font-size="44.521px" font-weight="bold" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.7111" text-align="center" text-anchor="middle" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal;line-height:1.1;paint-order:stroke markers fill" xml:space="preserve"><tspan x="39.867851" y="60.752583" fill="#ffffff" stroke-width="4.7111">%</tspan></text></g></svg>

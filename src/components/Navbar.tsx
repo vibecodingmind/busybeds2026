@@ -25,8 +25,7 @@ export function Navbar() {
       <div className="max-w-[1440px] mx-auto flex h-16 items-center justify-between px-8 w-full">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-xl shrink-0">
-          <span className="text-[#0E5C3B] text-2xl">🛏️</span>
-          <span className="text-[#1a1a2e] dark:text-white font-extrabold tracking-tight">BusyBeds</span>
+          <img src="/logo.svg" alt="BusyBeds" className="h-8 w-auto" />
         </Link>
 
         {/* Center Nav Links */}

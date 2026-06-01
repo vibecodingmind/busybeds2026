@@ -54,7 +54,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar - Desktop */}
       <aside className="w-64 border-r border-border bg-card p-4 hidden lg:flex flex-col">
         <div className="flex items-center gap-2 mb-6 px-2">
-          <span className="text-xl">🛏️</span>
+          <img src="/logo.svg" alt="BusyBeds" className="h-7 w-auto" />
           <span className="font-bold gradient-text">BusyBeds Admin</span>
         </div>
         <nav className="space-y-0.5 flex-1 overflow-y-auto">
@@ -90,7 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <aside className="absolute left-0 top-0 bottom-0 w-72 bg-card p-4 overflow-y-auto">
             <div className="flex items-center justify-between mb-6 px-2">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🛏️</span>
+                <img src="/logo.svg" alt="BusyBeds" className="h-7 w-auto" />
                 <span className="font-bold gradient-text">Admin</span>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}><X className="h-5 w-5" /></Button>
@@ -120,7 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Mobile header */}
         <div className="lg:hidden border-b border-border p-3 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)}><Menu className="h-5 w-5" /></Button>
-          <span className="font-bold text-sm">🛏️ Admin</span>
+          <span className="font-bold text-sm">Admin</span>
           <div className="ml-auto">
             <Badge variant="outline" className="text-xs">{user.fullName}</Badge>
           </div>

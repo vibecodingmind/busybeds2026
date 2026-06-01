@@ -34,7 +34,7 @@ export default function PortalPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="text-4xl mb-2">🛏️</div>
+          <img src="/logo.svg" alt="BusyBeds" className="h-14 w-auto mx-auto mb-2" />
           <h1 className="text-2xl font-bold gradient-text">BusyBeds</h1>
           <p className="text-sm text-muted-foreground">Hotel Redemption Portal</p>
         </div>

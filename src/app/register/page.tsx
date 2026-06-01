@@ -52,7 +52,7 @@ export default function RegisterPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="text-3xl mb-2">🛏️</div>
+          <img src="/logo.svg" alt="BusyBeds" className="h-12 w-auto mx-auto mb-2" />
           <CardTitle className="text-2xl">Create Account</CardTitle>
           <CardDescription>Join BusyBeds and start saving on hotels</CardDescription>
         </CardHeader>

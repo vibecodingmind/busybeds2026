@@ -34,10 +34,8 @@ export function AppHeader() {
     <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-[#1a1d27]/95 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-700/60 safe-area-top">
       <div className="grid grid-cols-[auto_1fr_auto] h-14 items-center gap-3 px-3 sm:px-4 lg:px-8 max-w-[1440px] mx-auto w-full">
         {/* Logo — left-aligned to content edge */}
-        <Link href="/" className="flex items-center gap-1.5 shrink-0">
-          <span className="text-[#0E5C3B] dark:text-[#10b981] text-xl">🛏️</span>
-          <span className="text-[#1a1a2e] dark:text-white font-extrabold text-lg tracking-tight hidden sm:inline">
-            Busy<span className="text-[#0E5C3B] dark:text-[#10b981]">Beds</span>
+        <Link href="/" className="flex items-center shrink-0">
+          <img src="/logo.svg" alt="BusyBeds" className="h-8 w-auto" />
           </span>
         </Link>
 

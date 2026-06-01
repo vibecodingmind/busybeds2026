@@ -58,7 +58,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-5">
         <Card>
           <CardHeader className="text-center">
-            <div className="text-3xl mb-2">🛏️</div>
+            <img src="/logo.svg" alt="BusyBeds" className="h-12 w-auto mx-auto mb-2" />
             <CardTitle className="text-2xl">Welcome back</CardTitle>
             <CardDescription>Log in to your BusyBeds account</CardDescription>
           </CardHeader>

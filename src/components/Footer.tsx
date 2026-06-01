@@ -7,8 +7,8 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 font-bold text-xl mb-4">
-              <span className="text-emerald text-2xl">🛏️</span>
-              <span className="gradient-text">BusyBeds</span>
+              <img src="/logo.svg" alt="BusyBeds" className="h-8 w-auto" />
+              
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Premium hotel discount coupons for travelers across Africa. Save up to 50% on your next stay in Tanzania, Kenya, Zanzibar and beyond.

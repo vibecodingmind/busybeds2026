@@ -25,8 +25,7 @@ export function MobileHeader() {
         <div className="flex h-14 items-center justify-between px-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-[#0E5C3B] text-xl">🛏️</span>
-            <span className="text-[#1a1a2e] dark:text-white font-extrabold text-lg tracking-tight">BusyBeds</span>
+            <img src="/logo.svg" alt="BusyBeds" className="h-7 w-auto" />
           </Link>
 
           {/* Right actions */}
