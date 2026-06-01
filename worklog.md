@@ -1,64 +1,28 @@
 ---
 Task ID: 1
 Agent: Main Agent
-Task: Fix BusyBeds preview not working - debug and fix build/runtime errors
+Task: Fix Railway build failure and all TypeScript errors
 
 Work Log:
-- Audited all project files - found extensive codebase with 140+ pages, 60+ API routes, 50+ UI components
-- Ran `next build` - found 10 build errors
-- Fixed all 7 page files with bad function names (spaces in identifiers)
-- Added missing exports: generateReferralCode, generateVerifyEmail, generateResetPasswordEmail
-- Fixed useSearchParams Suspense boundary issues in reset-password and verify-email pages
-- Added allowedDevOrigins config for preview system cross-origin support
-- Fixed prisma/seed.ts foreign key constraint for coupon.subscriptionId
-- Database seeded with realistic sample data
-- Verified production build succeeds and dev server works
+- Analyzed Railway build error: bun.lock was stale (dependencies added via npm, not bun)
+- Deleted package-lock.json to prevent package manager confusion
+- Ran `rm -rf node_modules bun.lock && bun install` to regenerate fresh bun.lock
+- Fixed all 56 TypeScript errors across src/:
+  - Next.js 16 breaking change: Updated 19 API route handlers to use `params: Promise<...>` with `await params`
+  - Fixed getSession(request) → getSession() in /api/auth/me/route.ts (function takes no args)
+  - Added `await` to hashPassword() calls in register and reset-password routes (returns Promise<string>)
+  - Updated Stripe API version from '2024-12-18.acacia' to '2026-05-27.dahlia'
+  - Fixed Stripe webhook: removed stripeInvoiceId from Invoice create, cast event data properly
+  - Added `reference` field to PesapalPaymentParams interface
+  - Fixed getEffectiveDiscount call: parse JSON discountRules, pass context object instead of boolean
+  - Fixed isWithinDateRange: remove extra argument, handle nullable Date fields
+  - Added phone/address fields to Hotel type definition
+  - Removed nonexistent ReviewIcon import from owner dashboard
+- Added /admin redirect page (was missing, caused 404)
+- Committed and pushed to main branch
 
 Stage Summary:
-- All build errors fixed, project compiles and runs successfully
-- Database seeded with 20 hotels, 80 coupons, 20 travelers, reviews, FAQs, blog posts
-- Test accounts: admin@busybeds.com/Admin123! and owner@busybeds.com/Owner123!
-
----
-Task ID: 2
-Agent: Main Agent
-Task: Redesign BusyBeds homepage with Airbnb-style UI based on user screenshot
-
-Work Log:
-- Analyzed uploaded screenshot using VLM to understand the desired Airbnb-style UI
-- Screenshot showed: nav bar with Packages/Things To Do/Become a Host, central search bar, category filters, hotel card grid grouped by city
-- Completely rewrote Navbar.tsx with Airbnb-style layout (logo, center nav links, right-side user controls)
-- Completely rewrote page.tsx with: search bar, category/tier tabs, property type icons, horizontal scrollable card sections grouped by city
-- Card design includes: image carousel with dots, heart/cart icons, discount badge, location, star rating, "Request coupons" button
-- Built and verified with `next build` - compiles successfully
-- Pushed code to GitHub: https://github.com/vibecodingmind/busybeds2026.git
-- Deployed to Railway via existing project (BusyBeds2026) - deployment SUCCESS
-- Live site: https://busybeds-web-production.up.railway.app/
-
-Stage Summary:
-- Homepage redesigned with Airbnb-style UI matching the screenshot
-- Navbar redesigned with: BusyBeds logo, Home/Packages/Things To Do/Become a Host, language selector, dark mode, user profile
-- Homepage features: search bar, category filters, property type icons, horizontal scrollable hotel cards by city
-- Code pushed to GitHub and deployed to Railway successfully
-
----
-Task ID: 1
-Agent: Main Agent
-Task: Major UX overhaul - remove Request Coupon, search in header, separate tiers/categories, demo login, app-like hotel detail
-
-Work Log:
-- Removed "Request Coupon" button from HotelCard component in homepage
-- Moved search bar into AppHeader (same row as logo + icons)
-- Separated TIERS (All/Standard/Premium/Luxury) from PROPERTY_TYPES (Hotels/Resort/Villa/etc)
-- Limited visible categories to 6 with left/right scroll arrows
-- Added MAP/NEAR ME/LIST filter buttons in same row as categories
-- Added demo login section on /login with Admin, Hotel Owner, Guest quick-login buttons
-- Completely rewrote hotel detail page (/hotels/[slug]) with app-like design: full-width image gallery, sticky bottom CTA, coupon modal
-- Removed ShoppingCart icon from hotel cards, kept only Heart
-- Build successful, pushed to GitHub, Railway deployed SUCCESS
-
-Stage Summary:
-- Homepage now has search integrated in header, separated tier/category filters, scroll arrows for categories
-- Login page has demo quick-login for 3 roles (admin/owner/guest)
-- Hotel detail page is fully app-like with swipeable images, sticky bottom CTA
-- Live at https://busybeds-web-production.up.railway.app/
+- All 56 → 0 TypeScript errors in src/
+- Next.js build succeeds locally
+- Changes pushed to GitHub (commit f6261f2)
+- Railway deployment should succeed on next build
