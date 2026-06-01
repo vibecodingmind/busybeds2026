@@ -38,6 +38,8 @@ model User {
   referralCode         String?   @unique
   corporateAccountId   String?
   displayCurrency      String    @default("USD")
+  twoFactorSecret      String?
+  twoFactorEnabled     Boolean   @default(false)
 
   coupons      Coupon[]
   reviews      Review[]
@@ -87,9 +89,9 @@ model Hotel {
   updatedAt        DateTime  @updatedAt
 
   // Google Places import fields
-  importSource     String?   // "google_places" | null
+  importSource     String?
   isPartner        Boolean   @default(false)
-  partnerDiscountPercent Int?  // set when marked as partner
+  partnerDiscountPercent Int?
   importedAt       DateTime?
 
   roomTypes     RoomType[]
@@ -146,6 +148,7 @@ model SubscriptionPackage {
   tier                 String   @default("basic")
   isActive             Boolean  @default(true)
   stripePriceIdMonthly String?
+  stripePriceIdAnnual  String?
   canBookStandard      Boolean  @default(true)
   canBookPremium       Boolean  @default(false)
   canBookLuxury        Boolean  @default(false)
@@ -164,6 +167,8 @@ model Subscription {
   startsAt           DateTime  @default(now())
   expiresAt          DateTime
   stripeSubId        String?
+  paypalSubId        String?
+  pesapalTrackingId  String?
   compedBy           String?
   compedReason       String?
   createdAt          DateTime  @default(now())
@@ -356,7 +361,7 @@ model NotificationPreference {
 
 model PushSubscription {
   id       String @id @default(cuid())
-  userId   String @unique
+  userId   String
   endpoint String
   p256dh   String
   auth     String
@@ -424,6 +429,7 @@ model Transaction {
   stripeInvoiceId String?
   stripeChargeId  String?
   pesapalRef      String?
+  paypalOrderId   String?
   paidAt          DateTime?
   createdAt       DateTime  @default(now())
 }
@@ -549,5 +555,71 @@ model HotelVote {
   userId    String
   hotelId   String
   type      String
+  createdAt DateTime @default(now())
+}
+
+// ===== NEW MODELS FOR FEATURE IMPLEMENTATION =====
+
+model ABTest {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  status      String   @default("draft")  // draft, running, completed
+  variants    String   @default("[]")     // JSON: [{name, discountPercent, weight}]
+  hotelId     String?  // null = global test
+  metric      String   @default("conversion") // conversion, revenue, redemption
+  winner      String?
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model ABTestEvent {
+  id        String   @id @default(cuid())
+  testId    String
+  variant   String
+  userId    String?
+  event     String   // view, click, purchase, redeem
+  createdAt DateTime @default(now())
+}
+
+model ExchangeRate {
+  id        String   @id @default(cuid())
+  base      String   @default("USD")
+  target    String
+  rate      Float
+  source    String   @default("api")
+  fetchedAt DateTime @default(now())
+}
+
+model WebhookEvent {
+  id         String   @id @default(cuid())
+  url        String
+  event      String
+  payload    String   // JSON
+  status     String   @default("pending") // pending, sent, failed
+  attempts   Int      @default(0)
+  lastAt     DateTime?
+  createdAt  DateTime @default(now())
+}
+
+model ScheduledReport {
+  id          String   @id @default(cuid())
+  name        String
+  frequency   String   @default("daily") // daily, weekly, monthly
+  recipients  String   // JSON array of emails
+  reportType  String   // revenue, users, coupons, hotels
+  isActive    Boolean  @default(true)
+  lastSentAt  DateTime?
+  createdAt   DateTime @default(now())
+}
+
+model PartnerApiKey {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  keyHash   String   @unique
+  isActive  Boolean  @default(true)
+  lastUsedAt DateTime?
   createdAt DateTime @default(now())
 }

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
-import { Users, Building2, Ticket, DollarSign, CreditCard, BarChart3, Star, Zap, Bell, FileText, Gift, Settings, AlertTriangle, MessageSquare, Map, LogOut, Menu, ChevronLeft, ChevronRight, Megaphone, Activity, UserCog, KeyRound, ChevronUp } from 'lucide-react';
+import { Users, Building2, Ticket, DollarSign, CreditCard, BarChart3, Star, Zap, Bell, FileText, Gift, Settings, AlertTriangle, MessageSquare, Map, LogOut, Menu, ChevronLeft, ChevronRight, Megaphone, Activity, UserCog, KeyRound, ChevronUp, ScrollText, ScanLine, QrCode, UsersRound, BarChart2, Globe, Shield } from 'lucide-react';
 
 const NAV_GROUPS = [
   { label: 'MANAGEMENT', items: [
@@ -27,9 +27,14 @@ const NAV_GROUPS = [
   ]},
   { label: 'SYSTEM', items: [
     { href: '/admin/settings', icon: Settings, label: 'Settings' },
+    { href: '/admin/audit-log', icon: ScrollText, label: 'Audit Log' },
     { href: '/admin/fraud', icon: AlertTriangle, label: 'Fraud' },
     { href: '/admin/stay-requests', icon: Map, label: 'Stay Requests' },
     { href: '/admin/activities', icon: Activity, label: 'Activities' },
+    { href: '/admin/qr-validate', icon: QrCode, label: 'QR Validate' },
+    { href: '/admin/roles', icon: Shield, label: 'Roles' },
+    { href: '/admin/reviews', icon: Star, label: 'Reviews' },
+    { href: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
   ]},
 ];
 

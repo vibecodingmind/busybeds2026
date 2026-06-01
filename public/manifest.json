@@ -1,29 +1,42 @@
 {
-  "name": "BusyBeds",
+  "name": "BusyBeds - Hotel Discount Platform",
   "short_name": "BusyBeds",
-  "description": "Premium hotel discount coupons for Africa. Save up to 50% on hotels in Tanzania, Kenya, Zanzibar and more.",
+  "description": "Get exclusive hotel discounts and coupons across Africa",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ea4d60",
+  "background_color": "#ffffff",
   "theme_color": "#ea4d60",
   "orientation": "portrait-primary",
-  "scope": "/",
   "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ],
-  "categories": ["travel", "lifestyle", "shopping"],
-  "lang": "en",
-  "dir": "ltr",
-  "prefer_related_applications": false
+  "categories": ["travel", "shopping"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Scan Coupon",
+      "url": "/scan",
+      "icons": [{"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml"}]
+    },
+    {
+      "name": "My Coupons",
+      "url": "/dashboard/coupons",
+      "icons": [{"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml"}]
+    }
+  ]
 }

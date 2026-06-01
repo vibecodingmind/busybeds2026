@@ -20,9 +20,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BusyBeds — Premium Hotel Discount Coupons",
+  title: {
+    default: "BusyBeds — Premium Hotel Discount Coupons",
+    template: "%s | BusyBeds",
+  },
   description: "Get exclusive discount coupons for premium hotels across Africa. Subscribe and save up to 50% on your next stay in Tanzania, Kenya, Zanzibar and more.",
-  keywords: ["hotel discounts", "Africa travel", "coupon codes", "Tanzania hotels", "Kenya hotels", "Zanzibar"],
+  keywords: ["hotel discounts", "Africa travel", "coupon codes", "Tanzania hotels", "Kenya hotels", "Zanzibar", "M-Pesa hotels", "busybeds"],
   icons: { icon: [{ url: "/favicon.ico", sizes: "48x48" }, { url: "/favicon.svg", type: "image/svg+xml" }], apple: "/apple-touch-icon.png" },
   manifest: "/manifest.json",
   appleWebApp: {
@@ -32,6 +35,29 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://busybeds.com",
+    siteName: "BusyBeds",
+    title: "BusyBeds — Premium Hotel Discount Coupons",
+    description: "Save up to 50% on hotels across Africa. Get exclusive discount coupons for Tanzania, Kenya, Zanzibar and more.",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "BusyBeds Hotel Discounts" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BusyBeds — Premium Hotel Discount Coupons",
+    description: "Save up to 50% on hotels across Africa",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-video-preview": -1, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  alternates: {
+    canonical: "https://busybeds.com",
   },
 };
 
