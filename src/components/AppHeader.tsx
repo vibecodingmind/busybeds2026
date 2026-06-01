@@ -32,8 +32,8 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-[#1a1d27]/95 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-700/60 safe-area-top">
-      <div className="flex h-14 items-center gap-3 px-4 max-w-[1440px] mx-auto w-full">
-        {/* Logo */}
+      <div className="grid grid-cols-[auto_1fr_auto] h-14 items-center gap-3 px-3 sm:px-4 lg:px-8 max-w-[1440px] mx-auto w-full">
+        {/* Logo — left-aligned to content edge */}
         <Link href="/" className="flex items-center gap-1.5 shrink-0">
           <span className="text-[#0E5C3B] dark:text-[#10b981] text-xl">🛏️</span>
           <span className="text-[#1a1a2e] dark:text-white font-extrabold text-lg tracking-tight hidden sm:inline">
@@ -41,20 +41,20 @@ export function AppHeader() {
           </span>
         </Link>
 
-        {/* Search Bar — in the same row */}
-        <div className="relative flex-1 max-w-xl">
+        {/* Search Bar — centered in the middle */}
+        <div className="relative w-full max-w-xl mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search hotels, cities..."
-            className="pl-9 h-9 bg-gray-100 dark:bg-gray-800 border-0 rounded-full text-sm focus:ring-2 focus:ring-[#0E5C3B]"
+            className="pl-9 h-9 w-full bg-gray-100 dark:bg-gray-800 border-0 rounded-full text-sm focus:ring-2 focus:ring-[#0E5C3B]"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
           />
         </div>
 
-        {/* Right actions — compact, app-style */}
-        <div className="flex items-center gap-1 shrink-0">
+        {/* Right actions — right-aligned to content edge */}
+        <div className="flex items-center gap-1 shrink-0 justify-end">
           {user && (
             <Link href="/notifications">
               <Button variant="ghost" size="icon" className="relative h-9 w-9 text-gray-500 hover:text-[#0E5C3B] dark:hover:text-[#10b981]">
