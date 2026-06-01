@@ -61,10 +61,6 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
-# Copy additional Prisma engine binaries
-COPY --from=builder /app/node_modules/@prisma/engines-version ./node_modules/@prisma/engines-version 2>/dev/null || true
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
-
 # Copy entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
