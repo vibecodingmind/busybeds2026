@@ -1,0 +1,483 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  passwordHash         String
+  role                 String    @default("traveler")
+  fullName             String
+  phone                String?
+  createdAt            DateTime  @default(now())
+  suspendedAt          DateTime?
+  suspendedReason      String?
+  isBanned             Boolean   @default(false)
+  emailVerified        Boolean   @default(false)
+  emailVerifyToken     String?
+  emailVerifyExpiry    DateTime?
+  googleId             String?   @unique
+  avatar               String?
+  bio                  String?
+  location             String?
+  websiteUrl           String?
+  spamScore            Int       @default(0)
+  registrationIp       String?
+  isFlagged            Boolean   @default(false)
+  passwordResetToken   String?
+  passwordResetExpiry  DateTime?
+  tokenVersion         Int       @default(0)
+  language             String    @default("en")
+  timezone             String    @default("UTC")
+  referralCode         String?   @unique
+  corporateAccountId   String?
+  displayCurrency      String    @default("USD")
+}
+
+model Hotel {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  city             String
+  country          String
+  category         String    @default("Hotel")
+  descriptionShort String
+  descriptionLong  String
+  starRating       Int       @default(3)
+  amenities        String    @default("[]")
+  vibeTags         String    @default("[]")
+  discountRules    String    @default("[]")
+  websiteUrl       String?
+  status           String    @default("active")
+  partnershipStatus String   @default("LISTING_ONLY")
+  tier             String    @default("standard")
+  isFeatured       Boolean   @default(false)
+  featuredUntil    DateTime?
+  coverImage       String?
+  images           String    @default("[]")
+  discountPercent  Int       @default(15)
+  couponValidDays  Int       @default(30)
+  geoLat           Float?
+  geoLng           Float?
+  lastCouponAt     DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model RoomType {
+  id             String  @id @default(cuid())
+  hotelId        String
+  name           String
+  bedType        String
+  sizeSqm        Float?
+  pricePerNight  Float
+  maxGuests      Int     @default(2)
+  description    String?
+  images         String  @default("[]")
+  isActive       Boolean @default(true)
+}
+
+model HotelOwner {
+  id                 String    @id @default(cuid())
+  userId             String    @unique
+  hotelId            String    @unique
+  kycStatus          String    @default("pending")
+  kycDocuments       String?
+  kycSubmittedAt     DateTime  @default(now())
+  kycReviewedAt      DateTime?
+  kycRejectionReason String?
+}
+
+model HotelManager {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  hotelId    String
+  assignedBy String?
+  assignedAt DateTime @default(now())
+  isActive   Boolean  @default(true)
+}
+
+model SubscriptionPackage {
+  id                   String   @id @default(cuid())
+  name                 String
+  priceMonthly         Float
+  priceAnnual          Float?
+  durationDays         Int
+  couponLimitPerPeriod Int      @default(5)
+  tier                 String   @default("basic")
+  isActive             Boolean  @default(true)
+  stripePriceIdMonthly String?
+  canBookStandard      Boolean  @default(true)
+  canBookPremium       Boolean  @default(false)
+  canBookLuxury        Boolean  @default(false)
+  maxPremiumPerPeriod  Int      @default(0)
+  maxLuxuryPerPeriod   Int      @default(0)
+}
+
+model Subscription {
+  id                 String    @id @default(cuid())
+  userId             String
+  packageId          String
+  status             String    @default("active")
+  billingCycle       String    @default("monthly")
+  startsAt           DateTime  @default(now())
+  expiresAt          DateTime
+  stripeSubId        String?
+  compedBy           String?
+  compedReason       String?
+  createdAt          DateTime  @default(now())
+  corporateAccountId String?
+}
+
+model Coupon {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  qrDataUrl       String?
+  userId          String
+  hotelId         String
+  subscriptionId  String
+  discountPercent Int
+  discountRuleName String?
+  guestName       String?
+  status          String    @default("active")
+  generatedAt     DateTime  @default(now())
+  expiresAt       DateTime
+  startTime       DateTime?
+  endTime         DateTime?
+  redeemedAt      DateTime?
+  usageLimit      Int?
+  priceUsd        Float?
+  priceTzs        Float?
+  exchangeRate    Float?
+}
+
+model CouponBlackout {
+  id        String   @id @default(cuid())
+  hotelId   String
+  startDate String
+  endDate   String
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  hotelId     String
+  userId      String?
+  rating      Int
+  title       String
+  body        String
+  isVerified  Boolean  @default(false)
+  isApproved  Boolean  @default(false)
+  ownerReply  String?
+  repliedAt   DateTime?
+  source      String   @default("busybeds")
+  createdAt   DateTime @default(now())
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  hotelId   String
+  createdAt DateTime @default(now())
+}
+
+model LoyaltyPoints {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  points    Int      @default(0)
+  lifetime  Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model PointTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  points      Int
+  type        String
+  description String
+  createdAt   DateTime @default(now())
+}
+
+model GiftCard {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  amount         Float
+  balance        Float
+  purchasedById  String?
+  redeemedById   String?
+  recipientEmail String?
+  recipientName  String?
+  message        String?
+  isActive       Boolean   @default(true)
+  expiresAt      DateTime?
+  purchasedAt    DateTime  @default(now())
+  redeemedAt     DateTime?
+  stripeSessionId String?
+}
+
+model FlashDeal {
+  id              String    @id @default(cuid())
+  hotelId         String
+  title           String
+  discountPercent Int
+  startsAt        DateTime
+  endsAt          DateTime
+  isActive        Boolean   @default(true)
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+}
+
+model StayRequest {
+  id            String    @id @default(cuid())
+  travelerId    String
+  hotelId       String
+  roomTypeId    String
+  managerId     String?
+  checkIn       DateTime
+  checkOut      DateTime
+  nights        Int
+  guests        Int       @default(1)
+  status        String    @default("pending")
+  depositAmount Float?
+  depositPaid   Boolean   @default(false)
+  platformFee   Float?
+  notes         String?
+  declineReason String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Message {
+  id            String   @id @default(cuid())
+  senderId      String
+  receiverId    String
+  hotelId       String?
+  stayRequestId String?
+  content       String
+  attachmentUrl String?
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model NotificationPreference {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  emailCoupons    Boolean @default(true)
+  emailExpiry     Boolean @default(true)
+  emailFlashDeals Boolean @default(true)
+  emailMessages   Boolean @default(true)
+  smsCoupons      Boolean @default(true)
+  smsExpiry       Boolean @default(false)
+  pushAll         Boolean @default(true)
+}
+
+model PushSubscription {
+  id       String @id @default(cuid())
+  userId   String @unique
+  endpoint String
+  p256dh   String
+  auth     String
+}
+
+model Referral {
+  id         String    @id @default(cuid())
+  code       String    @unique
+  referrerId String
+  referredId String?
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+model ReferralEarning {
+  id             String   @id @default(cuid())
+  referrerId     String
+  referredId     String
+  amount         Float
+  status         String   @default("pending")
+  subscriptionId String?
+  createdAt      DateTime @default(now())
+  availableAt    DateTime
+}
+
+model ReferralPayout {
+  id        String    @id @default(cuid())
+  userId    String
+  amount    Float
+  status    String    @default("pending")
+  reference String?
+  createdAt DateTime  @default(now())
+  paidAt    DateTime?
+}
+
+model Badge {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  awardedAt DateTime @default(now())
+}
+
+model PriceAlert {
+  id        String   @id @default(cuid())
+  userId    String
+  hotelId   String
+  threshold Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id              String    @id @default(cuid())
+  userId          String
+  subscriptionId  String?
+  amount          Float
+  currency        String    @default("USD")
+  status          String
+  type            String
+  description     String?
+  stripeInvoiceId String?
+  stripeChargeId  String?
+  pesapalRef      String?
+  paidAt          DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+model Invoice {
+  id             String    @id @default(cuid())
+  userId         String
+  subscriptionId String?
+  amount         Float
+  currency       String    @default("USD")
+  status         String
+  pdfUrl         String?
+  issuedAt       DateTime  @default(now())
+  dueAt          DateTime?
+  paidAt         DateTime?
+}
+
+model PaymentMethod {
+  id                    String   @id @default(cuid())
+  userId                String
+  type                  String
+  last4                 String?
+  brand                 String?
+  expiryMonth           Int?
+  expiryYear            Int?
+  mobileNumber          String?
+  mobileProvider        String?
+  isDefault             Boolean  @default(false)
+  stripePaymentMethodId String?
+  createdAt             DateTime @default(now())
+}
+
+model CorporateAccount {
+  id          String   @id @default(cuid())
+  name        String
+  adminUserId String   @unique
+  plan        String   @default("pro")
+  maxMembers  Int      @default(10)
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  target    String?
+  metadata  String?
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model SiteSettings {
+  key   String @id
+  value String
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  excerpt     String
+  content     String
+  coverImage  String?
+  authorId    String
+  status      String    @default("draft")
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String   @default("general")
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Amenity {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  icon     String
+  category String  @default("general")
+  isActive Boolean @default(true)
+}
+
+model HotelSuggestion {
+  id        String   @id @default(cuid())
+  userId    String
+  hotelName String
+  city      String
+  country   String
+  message   String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id            String   @id @default(cuid())
+  title         String
+  description   String
+  city          String
+  country       String
+  categoryId    String
+  price         Float?
+  duration      String?
+  images        String   @default("[]")
+  submittedById String
+  isApproved    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+}
+
+model ActivityCategory {
+  id   String @id @default(cuid())
+  name String @unique
+  icon String
+}
+
+model HotelVote {
+  id        String   @id @default(cuid())
+  userId    String
+  hotelId   String
+  type      String
+  createdAt DateTime @default(now())
+}

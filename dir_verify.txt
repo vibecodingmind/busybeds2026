@@ -1,0 +1,13 @@
+./
+  DIR: [hotelId] (len=9)
+[hotelId]/
+  DIR: reviews (len=7)
+  DIR: coupons (len=7)
+  DIR: rooms (len=5)
+  DIR: blackouts (len=9)
+[hotelId]/reviews/
+[hotelId]/coupons/
+[hotelId]/rooms/
+[hotelId]/blackouts/
+  DIR: [blackoutId] (len=12)
+[hotelId]/blackouts/[blackoutId]/
