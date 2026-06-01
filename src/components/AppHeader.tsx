@@ -36,7 +36,6 @@ export function AppHeader() {
         {/* Logo — left-aligned to content edge */}
         <Link href="/" className="flex items-center shrink-0">
           <img src="/logo.svg" alt="BusyBeds" className="h-8 w-auto" />
-          </span>
         </Link>
 
         {/* Search Bar — centered in the middle */}
