@@ -24,7 +24,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://busybeds:${DB_PASSWORD:-BusyB3ds2026}@db:5432/busybeds_prod
       - NODE_ENV=production
       - PORT=3000
     env_file:
