@@ -33,26 +33,39 @@ async function seed() {
 
   // Create 20 hotels
   const hotelData = [
-    { name: 'Serengeti Grand Hotel', city: 'Dar es Salaam', country: 'Tanzania', tier: 'luxury', starRating: 5, discountPercent: 20, category: 'Hotel' },
-    { name: 'Zanzibar Beach Resort', city: 'Zanzibar City', country: 'Zanzibar', tier: 'luxury', starRating: 5, discountPercent: 25, category: 'Resort' },
-    { name: 'Kilimanjaro View Lodge', city: 'Arusha', country: 'Tanzania', tier: 'premium', starRating: 4, discountPercent: 18, category: 'Lodge' },
-    { name: 'Nairobi Skyline Hotel', city: 'Nairobi', country: 'Kenya', tier: 'premium', starRating: 4, discountPercent: 15, category: 'Hotel' },
-    { name: 'Mombasa Coral Inn', city: 'Mombasa', country: 'Kenya', tier: 'standard', starRating: 3, discountPercent: 12, category: 'Hotel' },
-    { name: 'Stone Town Heritage', city: 'Stone Town', country: 'Zanzibar', tier: 'premium', starRating: 4, discountPercent: 20, category: 'BnB' },
-    { name: 'Nungwi Beach Villa', city: 'Nungwi', country: 'Zanzibar', tier: 'luxury', starRating: 5, discountPercent: 22, category: 'Villa' },
-    { name: 'Lake Victoria Lodge', city: 'Mwanza', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 10, category: 'Lodge' },
-    { name: 'Kampala Central Hotel', city: 'Kampala', country: 'Uganda', tier: 'standard', starRating: 3, discountPercent: 12, category: 'Hotel' },
-    { name: 'Kigali Serena Hotel', city: 'Kigali', country: 'Rwanda', tier: 'premium', starRating: 4, discountPercent: 15, category: 'Hotel' },
-    { name: 'Diani Ocean Resort', city: 'Diani', country: 'Kenya', tier: 'premium', starRating: 4, discountPercent: 18, category: 'Resort' },
-    { name: 'Kendwa Sunset Lodge', city: 'Kendwa', country: 'Zanzibar', tier: 'standard', starRating: 3, discountPercent: 14, category: 'Lodge' },
-    { name: 'Dar Business Hotel', city: 'Dar es Salaam', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 10, category: 'Hotel' },
-    { name: 'Arusha Safari Lodge', city: 'Arusha', country: 'Tanzania', tier: 'premium', starRating: 4, discountPercent: 16, category: 'Lodge' },
-    { name: 'Entebbe Lakeside Hotel', city: 'Entebbe', country: 'Uganda', tier: 'standard', starRating: 3, discountPercent: 12, category: 'Hotel' },
-    { name: 'Nakuru Flamingo Lodge', city: 'Nakuru', country: 'Kenya', tier: 'standard', starRating: 3, discountPercent: 11, category: 'Lodge' },
-    { name: 'Paje Kite Resort', city: 'Paje', country: 'Zanzibar', tier: 'premium', starRating: 4, discountPercent: 17, category: 'Resort' },
-    { name: 'Dodoma Central Inn', city: 'Dodoma', country: 'Tanzania', tier: 'standard', starRating: 2, discountPercent: 8, category: 'Hotel' },
-    { name: 'Kisumu Lakeview Hotel', city: 'Kisumu', country: 'Kenya', tier: 'standard', starRating: 3, discountPercent: 10, category: 'Hotel' },
-    { name: 'Jinja Nile Resort', city: 'Jinja', country: 'Uganda', tier: 'premium', starRating: 4, discountPercent: 15, category: 'Resort' },
+    // Partner hotels (ACTIVE) - have discount coupons
+    { name: 'Serengeti Grand Hotel', city: 'Dar es Salaam', country: 'Tanzania', tier: 'luxury', starRating: 5, discountPercent: 20, category: 'Hotel', partnership: 'ACTIVE' },
+    { name: 'Zanzibar Beach Resort', city: 'Zanzibar City', country: 'Zanzibar', tier: 'luxury', starRating: 5, discountPercent: 25, category: 'Resort', partnership: 'ACTIVE' },
+    { name: 'Kilimanjaro View Lodge', city: 'Arusha', country: 'Tanzania', tier: 'premium', starRating: 4, discountPercent: 18, category: 'Lodge', partnership: 'ACTIVE' },
+    { name: 'Nairobi Skyline Hotel', city: 'Nairobi', country: 'Kenya', tier: 'premium', starRating: 4, discountPercent: 15, category: 'Hotel', partnership: 'ACTIVE' },
+    { name: 'Mombasa Coral Inn', city: 'Mombasa', country: 'Kenya', tier: 'standard', starRating: 3, discountPercent: 12, category: 'Hotel', partnership: 'ACTIVE' },
+    { name: 'Stone Town Heritage', city: 'Stone Town', country: 'Zanzibar', tier: 'premium', starRating: 4, discountPercent: 20, category: 'BnB', partnership: 'ACTIVE' },
+    { name: 'Nungwi Beach Villa', city: 'Nungwi', country: 'Zanzibar', tier: 'luxury', starRating: 5, discountPercent: 22, category: 'Villa', partnership: 'ACTIVE' },
+    { name: 'Diani Ocean Resort', city: 'Diani', country: 'Kenya', tier: 'premium', starRating: 4, discountPercent: 18, category: 'Resort', partnership: 'ACTIVE' },
+    { name: 'Arusha Safari Lodge', city: 'Arusha', country: 'Tanzania', tier: 'premium', starRating: 4, discountPercent: 16, category: 'Lodge', partnership: 'ACTIVE' },
+    { name: 'Paje Kite Resort', city: 'Paje', country: 'Zanzibar', tier: 'premium', starRating: 4, discountPercent: 17, category: 'Resort', partnership: 'ACTIVE' },
+    // Non-partner hotels (LISTING_ONLY) - show contacts, no coupons
+    { name: 'Lake Victoria Lodge', city: 'Mwanza', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY' },
+    { name: 'Kampala Central Hotel', city: 'Kampala', country: 'Uganda', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY' },
+    { name: 'Kigali Serena Hotel', city: 'Kigali', country: 'Rwanda', tier: 'premium', starRating: 4, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY' },
+    { name: 'Kendwa Sunset Lodge', city: 'Kendwa', country: 'Zanzibar', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY' },
+    { name: 'Dar Business Hotel', city: 'Dar es Salaam', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY' },
+    { name: 'Entebbe Lakeside Hotel', city: 'Entebbe', country: 'Uganda', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY' },
+    { name: 'Nakuru Flamingo Lodge', city: 'Nakuru', country: 'Kenya', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY' },
+    { name: 'Dodoma Central Inn', city: 'Dodoma', country: 'Tanzania', tier: 'standard', starRating: 2, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY' },
+    { name: 'Kisumu Lakeview Hotel', city: 'Kisumu', country: 'Kenya', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY' },
+    { name: 'Jinja Nile Resort', city: 'Jinja', country: 'Uganda', tier: 'premium', starRating: 4, discountPercent: 0, category: 'Resort', partnership: 'LISTING_ONLY' },
+    // More hotels with geo data
+    { name: 'Tanzanite Hotel', city: 'Arusha', country: 'Tanzania', tier: 'luxury', starRating: 5, discountPercent: 20, category: 'Hotel', partnership: 'ACTIVE', lat: -3.3869, lng: 36.6830 },
+    { name: 'Coral Beach Club', city: 'Dar es Salaam', country: 'Tanzania', tier: 'premium', starRating: 4, discountPercent: 15, category: 'Resort', partnership: 'ACTIVE', lat: -6.7924, lng: 39.2083 },
+    { name: 'Maru Maru Hotel', city: 'Stone Town', country: 'Zanzibar', tier: 'premium', starRating: 4, discountPercent: 14, category: 'Hotel', partnership: 'ACTIVE', lat: -6.1647, lng: 39.1989 },
+    { name: 'Flamingo Beach Resort', city: 'Mombasa', country: 'Kenya', tier: 'luxury', starRating: 5, discountPercent: 22, category: 'Resort', partnership: 'ACTIVE', lat: -4.0500, lng: 39.6672 },
+    { name: 'Sarova Stanley', city: 'Nairobi', country: 'Kenya', tier: 'luxury', starRating: 5, discountPercent: 18, category: 'Hotel', partnership: 'ACTIVE', lat: -1.2864, lng: 36.8172 },
+    { name: 'Bwejuu Beach Lodge', city: 'Bwejuu', country: 'Zanzibar', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY', lat: -6.3433, lng: 39.5589 },
+    { name: 'Kilindi Resort', city: 'Kendwa', country: 'Zanzibar', tier: 'luxury', starRating: 5, discountPercent: 0, category: 'Resort', partnership: 'LISTING_ONLY', lat: -5.9575, lng: 39.5578 },
+    { name: 'Masai Mara Lodge', city: 'Narok', country: 'Kenya', tier: 'luxury', starRating: 5, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY', lat: -1.4833, lng: 35.0167 },
+    { name: 'Usambara Mountain Lodge', city: 'Lushoto', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY', lat: -4.7833, lng: 38.2833 },
+    { name: 'Mikumi Safari Lodge', city: 'Mikumi', country: 'Tanzania', tier: 'premium', starRating: 4, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY', lat: -7.3333, lng: 36.9833 },
   ];
 
   const hotels = [];
@@ -65,7 +78,10 @@ async function seed() {
       starRating: h.starRating, discountPercent: h.discountPercent, tier: h.tier,
       amenities: JSON.stringify(['WiFi','Pool','Restaurant','Parking']),
       vibeTags: JSON.stringify(['Romantic','Family-friendly']),
-      partnershipStatus: 'ACTIVE', status: 'active',
+      partnershipStatus: h.partnership || 'ACTIVE', status: 'active',
+      geoLat: (h as any).lat || null, geoLng: (h as any).lng || null,
+      phone: h.partnership === 'LISTING_ONLY' ? '+255 ' + Math.floor(700000000 + Math.random() * 99999999) : null,
+      address: `${h.city}, ${h.country}`,
     } });
     hotels.push(hotel);
 

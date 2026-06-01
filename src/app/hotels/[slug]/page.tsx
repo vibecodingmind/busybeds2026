@@ -182,14 +182,58 @@ export default function HotelDetailPage() {
           )}
         </div>
 
-        {/* Quick discount info */}
-        {hotel.discountPercent > 0 && (
+        {/* Quick discount info - only for partner hotels */}
+        {hotel.partnershipStatus === 'ACTIVE' && hotel.discountPercent > 0 && (
           <div className="mt-3 flex items-center gap-2 p-3 bg-[#0E5C3B]/5 dark:bg-[#10b981]/10 rounded-xl">
             <Ticket className="h-5 w-5 text-[#0E5C3B] dark:text-[#10b981] shrink-0" />
             <div>
               <p className="text-sm font-semibold text-[#0E5C3B] dark:text-[#10b981]">{hotel.discountPercent}% member discount</p>
               <p className="text-xs text-gray-500">Subscribe to unlock exclusive coupons</p>
             </div>
+          </div>
+        )}
+
+        {/* Non-partner hotel notice */}
+        {hotel.partnershipStatus !== 'ACTIVE' && (
+          <div className="mt-3 p-3 bg-[#C8932A]/5 dark:bg-[#C8932A]/10 rounded-xl">
+            <p className="text-sm font-semibold text-[#C8932A]">Listed Hotel</p>
+            <p className="text-xs text-gray-500">This hotel is listed for discovery. Contact them directly or recommend they join BusyBeds for exclusive coupons.</p>
+          </div>
+        )}
+
+        {/* Contact info for non-partner hotels */}
+        {hotel.partnershipStatus !== 'ACTIVE' && (hotel.phone || hotel.address || hotel.websiteUrl) && (
+          <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl space-y-2">
+            {hotel.address && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <MapPin className="h-4 w-4 shrink-0 text-gray-400" /> {hotel.address}
+              </div>
+            )}
+            {hotel.phone && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <Phone className="h-4 w-4 shrink-0 text-gray-400" /> {hotel.phone}
+              </div>
+            )}
+            {hotel.websiteUrl && (
+              <a href={hotel.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-[#0E5C3B] dark:text-[#10b981] hover:underline">
+                <Globe className="h-4 w-4 shrink-0" /> Visit website
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* Google Maps */}
+        {hotel.geoLat && hotel.geoLng && (
+          <div className="mt-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
+            <iframe
+              width="100%"
+              height="200"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&q=${hotel.geoLat},${hotel.geoLng}&zoom=14`}
+              allowFullScreen
+            />
           </div>
         )}
       </div>
@@ -321,31 +365,47 @@ export default function HotelDetailPage() {
         </Tabs>
       </div>
 
-      {/* Sticky Bottom CTA - App style */}
+      {/* Sticky Bottom CTA - Partner vs Non-Partner */}
       <div className="fixed bottom-16 left-0 right-0 z-40 bg-white/95 dark:bg-[#1a1d27]/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-gray-700/60 px-4 py-3 safe-area-bottom">
-        <div className="flex items-center gap-3 max-w-lg mx-auto">
-          <div className="flex-1">
-            {hotel.roomTypes && hotel.roomTypes.length > 0 ? (
-              <>
-                <p className="text-xs text-gray-500">Rooms from</p>
-                <p className="text-xl font-bold text-[#0E5C3B] dark:text-[#10b981]">
-                  {formatPrice(Math.min(...hotel.roomTypes.map(r => r.pricePerNight)))}
-                  <span className="text-xs font-normal text-gray-500">/night</span>
-                </p>
-              </>
-            ) : (
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">Get Discount Coupon</p>
-            )}
+        {hotel.partnershipStatus === 'ACTIVE' ? (
+          <div className="flex items-center gap-3 max-w-lg mx-auto">
+            <div className="flex-1">
+              {hotel.roomTypes && hotel.roomTypes.length > 0 ? (
+                <>
+                  <p className="text-xs text-gray-500">Rooms from</p>
+                  <p className="text-xl font-bold text-[#0E5C3B] dark:text-[#10b981]">
+                    {formatPrice(Math.min(...hotel.roomTypes.map(r => r.pricePerNight)))}
+                    <span className="text-xs font-normal text-gray-500">/night</span>
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">Get Discount Coupon</p>
+              )}
+            </div>
+            <Button
+              className="bg-[#0E5C3B] hover:bg-[#0a4d31] dark:bg-[#10b981] dark:hover:bg-[#059669] text-white rounded-xl h-12 px-6 text-sm font-semibold active:scale-95 transition-all"
+              onClick={handleGenerateCoupon}
+              disabled={generating}
+            >
+              {generating ? 'Generating...' : <><Ticket className="mr-1.5 h-4 w-4" /> Get Coupon</>}
+            </Button>
           </div>
-          <Button
-            className="bg-[#0E5C3B] hover:bg-[#0a4d31] dark:bg-[#10b981] dark:hover:bg-[#059669] text-white rounded-xl h-12 px-6 text-sm font-semibold active:scale-95 transition-all"
-            onClick={handleGenerateCoupon}
-            disabled={generating}
-          >
-            {generating ? 'Generating...' : <><Ticket className="mr-1.5 h-4 w-4" /> Get Coupon</>}
-          </Button>
-        </div>
-        {!user && <p className="text-[10px] text-gray-400 text-center mt-1">Login required to generate coupons</p>}
+        ) : (
+          <div className="flex items-center gap-3 max-w-lg mx-auto">
+            <div className="flex-1">
+              <p className="text-xs text-gray-500">This hotel is not a partner yet</p>
+              <p className="text-sm font-semibold text-[#C8932A]">Recommend for BusyBeds Partner Program</p>
+            </div>
+            <Link href={`/hotels/${hotel.slug}?recommend=true`}>
+              <Button
+                className="bg-[#C8932A] hover:bg-[#b8841f] text-white rounded-xl h-12 px-5 text-sm font-semibold active:scale-95 transition-all"
+              >
+                <Heart className="mr-1.5 h-4 w-4" /> Recommend
+              </Button>
+            </Link>
+          </div>
+        )}
+        {!user && hotel.partnershipStatus === 'ACTIVE' && <p className="text-[10px] text-gray-400 text-center mt-1">Login required to generate coupons</p>}
       </div>
 
       {/* Coupon Result Modal */}
