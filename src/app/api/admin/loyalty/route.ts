@@ -1,17 +1,36 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getSession } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-    if (!session || session.role !== 'admin') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {};
+    if (search) {
+      where.user = {
+        OR: [
+          { fullName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      };
+    }
 
     const loyaltyData = await db.loyaltyPoints.findMany({
+      where,
       orderBy: { points: 'desc' },
-      take: 50,
+      skip: (page - 1) * limit,
+      take: limit,
+      include: {
+        user: { select: { id: true, fullName: true, email: true } },
+      },
     });
 
-    return NextResponse.json({ success: true, data: loyaltyData });
+    const total = await db.loyaltyPoints.count({ where });
+
+    return NextResponse.json({ success: true, data: loyaltyData, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) { return NextResponse.json({ success: false, error: 'Failed to fetch loyalty data' }, { status: 500 }); }
 }

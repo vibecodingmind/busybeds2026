@@ -1,28 +1,24 @@
 # ═══════════════════════════════════════════════════════════════
 # BusyBeds Production Docker Compose
-# Multi-app ready: Each app gets its own docker-compose file
+# Blue-Green Zero-Downtime Deployment Ready
 #
 # Usage:
-#   docker compose up -d          # Start BusyBeds
-#   docker compose logs -f        # View logs
-#   docker compose down            # Stop
-#   docker compose up -d --build  # Rebuild and start
+#   Standard:  docker compose up -d
+#   Blue slot: APP_PORT=3000 docker compose -p busybeds-blue up -d --build
+#   Green slot: APP_PORT=3001 docker compose -p busybeds-green up -d --build
 #
-# To add another app alongside BusyBeds:
-#   1. Create /var/www/another-app/docker-compose.yml
-#   2. docker compose -f /var/www/another-app/docker-compose.yml up -d
+# The deploy script handles slot switching automatically.
 # ═══════════════════════════════════════════════════════════════
 
 services:
   # ── BusyBeds Next.js App ──
   app:
-    container_name: busybeds-app
     build:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${APP_PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -49,13 +45,8 @@ services:
 
   # ── PostgreSQL Database ──
   db:
-    container_name: busybeds-db
     image: postgres:16-alpine
     restart: unless-stopped
-    # No external port needed - app connects via Docker network
-    # Only expose if you need external access (e.g., pgAdmin from outside)
-    # ports:
-    #   - "5432:5432"
     environment:
       POSTGRES_DB: busybeds_prod
       POSTGRES_USER: busybeds
