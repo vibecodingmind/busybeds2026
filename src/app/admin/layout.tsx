@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
-import { Users, Building2, Ticket, DollarSign, CreditCard, BarChart3, Star, Zap, Bell, FileText, Gift, Settings, AlertTriangle, MessageSquare, Map, LogOut, Menu, ChevronLeft, ChevronRight, Megaphone, Activity } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Users, Building2, Ticket, DollarSign, CreditCard, BarChart3, Star, Zap, Bell, FileText, Gift, Settings, AlertTriangle, MessageSquare, Map, LogOut, Menu, ChevronLeft, ChevronRight, Megaphone, Activity, UserCog, KeyRound, ChevronUp } from 'lucide-react';
 
 const NAV_GROUPS = [
   { label: 'MANAGEMENT', items: [
@@ -40,14 +39,100 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+  const avatarMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || user.role !== 'admin')) { router.push('/'); return; }
   }, [user, authLoading]);
 
+  // Close avatar menu on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (avatarMenuRef.current && !avatarMenuRef.current.contains(e.target as Node)) {
+        setAvatarMenuOpen(false);
+      }
+    };
+    if (avatarMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [avatarMenuOpen]);
+
   if (authLoading || !user || user.role !== 'admin') return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin h-8 w-8 border-4 border-[#ea4d60] border-t-transparent rounded-full" /></div>;
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+
+  const handleSignOut = async () => {
+    setAvatarMenuOpen(false);
+    setMobileMenuOpen(false);
+    await logout();
+    router.push('/login');
+  };
+
+  const AvatarDropdown = () => (
+    <div className="relative" ref={avatarMenuRef}>
+      {/* Avatar trigger button */}
+      <button
+        onClick={() => setAvatarMenuOpen(!avatarMenuOpen)}
+        className={`w-full flex items-center gap-3 ${collapsed ? 'justify-center p-2' : 'px-3 py-2'} rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}
+      >
+        <div className="w-8 h-8 rounded-full bg-[#ea4d60] flex items-center justify-center text-white text-xs font-bold shrink-0 relative">
+          {user.avatar ? (
+            <img src={user.avatar} alt={user.fullName} className="w-8 h-8 rounded-full object-cover" />
+          ) : (
+            user.fullName?.charAt(0)?.toUpperCase() || 'A'
+          )}
+        </div>
+        {!collapsed && (
+          <>
+            <div className="min-w-0 flex-1 text-left">
+              <p className="text-sm font-medium truncate">{user.fullName}</p>
+              <p className="text-xs text-gray-400 truncate">{user.email}</p>
+            </div>
+            <ChevronUp className={`h-4 w-4 text-gray-400 shrink-0 transition-transform ${avatarMenuOpen ? 'rotate-180' : ''}`} />
+          </>
+        )}
+      </button>
+
+      {/* Dropdown menu */}
+      {avatarMenuOpen && (
+        <div className={`absolute ${collapsed ? 'left-full ml-2 bottom-0' : 'bottom-full left-0 right-0 mb-1'} bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-[60] py-1 min-w-[200px]`}>
+          {/* User info header in dropdown */}
+          {collapsed && (
+            <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
+              <p className="text-sm font-medium truncate">{user.fullName}</p>
+              <p className="text-xs text-gray-400 truncate">{user.email}</p>
+            </div>
+          )}
+          <Link
+            href="/admin/account"
+            onClick={() => { setAvatarMenuOpen(false); setMobileMenuOpen(false); }}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <UserCog className="h-4 w-4" />
+            My Account
+          </Link>
+          <Link
+            href="/admin/account?tab=password"
+            onClick={() => { setAvatarMenuOpen(false); setMobileMenuOpen(false); }}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          >
+            <KeyRound className="h-4 w-4" />
+            Change Password
+          </Link>
+          <div className="border-t border-gray-100 dark:border-gray-800 my-1" />
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 w-full transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
 
   const SidebarContent = ({ collapsed: isCollapsed }: { collapsed: boolean }) => (
     <div className="flex flex-col h-full">
@@ -95,33 +180,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         ))}
       </nav>
 
-      {/* Bottom section */}
-      <div className={`border-t border-gray-100 dark:border-gray-800 ${isCollapsed ? 'px-2' : 'px-3'} py-3`}>
-        {!isCollapsed ? (
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-[#ea4d60] flex items-center justify-center text-white text-xs font-bold shrink-0">
-              {user.fullName?.charAt(0)?.toUpperCase() || 'A'}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate">{user.fullName}</p>
-              <p className="text-xs text-gray-400 truncate">{user.email}</p>
-            </div>
-          </div>
-        ) : (
-          <div className="flex justify-center mb-2">
-            <div className="w-8 h-8 rounded-full bg-[#ea4d60] flex items-center justify-center text-white text-xs font-bold">
-              {user.fullName?.charAt(0)?.toUpperCase() || 'A'}
-            </div>
-          </div>
-        )}
-        <button
-          onClick={async () => { await logout(); router.push('/login'); }}
-          className={`flex items-center gap-2 ${isCollapsed ? 'justify-center' : ''} w-full px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors`}
-          title="Sign Out"
-        >
-          <LogOut className="h-4 w-4 shrink-0" />
-          {!isCollapsed && <span>Sign Out</span>}
-        </button>
+      {/* Bottom section - Avatar with dropdown */}
+      <div className={`border-t border-gray-100 dark:border-gray-800 ${isCollapsed ? 'px-1' : 'px-2'} py-2`}>
+        <AvatarDropdown />
       </div>
     </div>
   );
@@ -148,8 +209,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-[240px] bg-white dark:bg-[#1a1d27] shadow-xl">
+          <div className="absolute inset-0 bg-black/50" onClick={() => { setMobileMenuOpen(false); setAvatarMenuOpen(false); }} />
+          <aside className="absolute left-0 top-0 bottom-0 w-[260px] bg-white dark:bg-[#1a1d27] shadow-xl">
             <SidebarContent collapsed={false} />
           </aside>
         </div>
