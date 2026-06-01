@@ -127,24 +127,67 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    /* App-like touch behavior */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
   body {
     @apply bg-background text-foreground;
+    /* Prevent overscroll bounce */
+    overscroll-behavior-y: none;
+    /* Smooth momentum scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+    /* Prevent text selection in app-like UI */
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Allow text selection in content areas */
+  p, span, h1, h2, h3, h4, h5, h6, li, a, input, textarea, [data-selectable] {
+    -webkit-user-select: auto;
+    user-select: auto;
   }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--muted-foreground); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--foreground); }
+/* ===== APP-LIKE STYLES ===== */
 
-/* Smooth transitions */
+/* Safe area insets for notched phones */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Hide scrollbar globally for app feel */
+::-webkit-scrollbar { width: 0px; height: 0px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: transparent; }
+
+/* But show scrollbar on desktop hover */
+@media (hover: hover) {
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+}
+
+/* Hide scrollbar for horizontal scroll sections */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* App-like smooth transitions */
 .transition-theme { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
 
-/* Hotel card hover */
+/* Hotel card hover (desktop) and press (mobile) */
 .hotel-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.hotel-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+@media (hover: hover) {
+  .hotel-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+}
+.hotel-card:active { transform: scale(0.98); }
+
+/* Active press effect for buttons and interactive elements */
+.press-effect { transition: transform 0.1s ease; }
+.press-effect:active { transform: scale(0.96); }
 
 /* Badge pulse animation */
 @keyframes badge-pulse {
@@ -162,4 +205,89 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Page transition animation */
+@keyframes page-slide-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: page-slide-in 0.25s ease-out; }
+
+/* Pull-to-refresh visual hint */
+@keyframes pull-indicator {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+/* Bottom sheet slide animation */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.slide-up { animation: slide-up 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+
+/* App-like ripple effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(0,0,0,0.08) 10%, transparent 10.01%);
+  transform: scale(10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 0.5s;
+}
+.ripple:active::after {
+  transform: scale(0);
+  opacity: 1;
+  transition: 0s;
+}
+
+/* Prevent iOS rubber banding on non-scrollable pages */
+html, body {
+  overflow: hidden;
+  height: 100%;
+}
+body {
+  overflow-y: auto;
+  overscroll-behavior-y: none;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* iOS status bar background */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Focus styles - minimal for app feel */
+*:focus-visible {
+  outline: 2px solid var(--emerald);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Disable zoom on input focus (iOS) */
+@supports (-webkit-touch-callout: none) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
