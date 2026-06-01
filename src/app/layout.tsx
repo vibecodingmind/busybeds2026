@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   title: "BusyBeds — Premium Hotel Discount Coupons",
   description: "Get exclusive discount coupons for premium hotels across Africa. Subscribe and save up to 50% on your next stay in Tanzania, Kenya, Zanzibar and more.",
   keywords: ["hotel discounts", "Africa travel", "coupon codes", "Tanzania hotels", "Kenya hotels", "Zanzibar"],
-  icons: { icon: "/logo.svg", apple: "/icon-192.png" },
+  icons: { icon: [{ url: "/favicon.ico", sizes: "48x48" }, { url: "/favicon.svg", type: "image/svg+xml" }], apple: "/apple-touch-icon.png" },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

@@ -4,8 +4,8 @@
   "description": "Premium hotel discount coupons for Africa. Save up to 50% on hotels in Tanzania, Kenya, Zanzibar and more.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0E5C3B",
+  "background_color": "#ea4d60",
+  "theme_color": "#ea4d60",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [
