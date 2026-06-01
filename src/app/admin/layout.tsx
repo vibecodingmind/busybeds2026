@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import { Users, Building2, Ticket, DollarSign, CreditCard, BarChart3, Star, Zap, Shield, Bell, FileText, Gift, Globe, Settings, AlertTriangle, MessageSquare, Map, Briefcase, LogOut, Menu, X, ChevronLeft, ChevronRight, Search, CreditCard as Payments, Megaphone, Activity } from 'lucide-react';
+import { Users, Building2, Ticket, DollarSign, CreditCard, BarChart3, Star, Zap, Bell, FileText, Gift, Settings, AlertTriangle, MessageSquare, Map, LogOut, Menu, ChevronLeft, ChevronRight, Megaphone, Activity } from 'lucide-react';
 
 const NAV_GROUPS = [
   { label: 'MANAGEMENT', items: [
@@ -156,21 +155,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       )}
 
+      {/* Floating mobile menu button */}
+      <button
+        onClick={() => setMobileMenuOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-40 h-10 w-10 rounded-xl bg-white dark:bg-[#1a1d27] shadow-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
       {/* Main content */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Mobile header */}
-        <div className="lg:hidden bg-white dark:bg-[#1a1d27] border-b border-gray-100 dark:border-gray-800 p-3 flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setMobileMenuOpen(true)}>
-            <Menu className="h-5 w-5" />
-          </Button>
-          <img src="/favicon.svg" alt="" className="h-6 w-6" />
-          <span className="font-bold text-sm">Admin</span>
-          <div className="ml-auto">
-            <div className="w-7 h-7 rounded-full bg-[#ea4d60] flex items-center justify-center text-white text-[10px] font-bold">
-              {user.fullName?.charAt(0)?.toUpperCase() || 'A'}
-            </div>
-          </div>
-        </div>
         <div className="flex-1 p-4 md:p-6 max-w-full overflow-x-auto">{children}</div>
       </div>
     </div>
