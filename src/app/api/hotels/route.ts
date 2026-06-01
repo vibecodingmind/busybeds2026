@@ -65,7 +65,6 @@ export async function GET(request: NextRequest) {
     const [hotels, total] = await Promise.all([
       db.hotel.findMany({
         where,
-        include: { roomTypes: { where: { isActive: true } } },
         orderBy,
         skip,
         take: limit,
@@ -140,7 +139,6 @@ export async function POST(request: NextRequest) {
         coverImage: data.coverImage || null,
         couponValidDays: data.couponValidDays,
       },
-      include: { roomTypes: true },
     });
 
     return NextResponse.json({

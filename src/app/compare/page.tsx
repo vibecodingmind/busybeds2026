@@ -1,0 +1,2 @@
+'use client'; import { Card, CardContent } from '@/components/ui/card'; import { GitCompare } from 'lucide-react';
+export default function ComparePage() { return (<div className="container mx-auto px-4 py-8"><h1 className="text-3xl font-bold mb-6">Compare Hotels</h1><Card className="p-8 text-center"><GitCompare className="h-12 w-12 text-muted-foreground mx-auto mb-3"/><p className="text-muted-foreground">Compare up to 3 hotels side by side.</p></Card></div>); }

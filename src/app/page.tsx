@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, MapPin, Star, ArrowRight, Check, Zap, Shield, Users, Globe, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Star, ArrowRight, Check, Zap, Shield, Users, Globe, ChevronRight, Building2 } from 'lucide-react';
 import type { Hotel, SubscriptionPackage, FAQ } from '@/types';
 
 const PLAN_FEATURES = [

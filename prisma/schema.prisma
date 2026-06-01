@@ -37,6 +37,19 @@ model User {
   referralCode         String?   @unique
   corporateAccountId   String?
   displayCurrency      String    @default("USD")
+
+  coupons      Coupon[]
+  reviews      Review[]
+  favorites    Favorite[]
+  loyalty      LoyaltyPoints?
+  badges       Badge[]
+  notifications Notification[]
+  referrals    Referral[]
+  pointTransactions PointTransaction[]
+  subscriptions Subscription[]
+  messagesSent   Message[]  @relation("SentMessages")
+  messagesReceived Message[]  @relation("ReceivedMessages")
+  stayRequests   StayRequest[]
 }
 
 model Hotel {
@@ -67,6 +80,14 @@ model Hotel {
   lastCouponAt     DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+
+  roomTypes     RoomType[]
+  reviews       Review[]
+  coupons       Coupon[]
+  favorites     Favorite[]
+  blackoutDates CouponBlackout[]
+  flashDeals    FlashDeal[]
+  stayRequests  StayRequest[]
 }
 
 model RoomType {
@@ -80,6 +101,8 @@ model RoomType {
   description    String?
   images         String  @default("[]")
   isActive       Boolean @default(true)
+
+  hotel Hotel @relation(fields: [hotelId], references: [id])
 }
 
 model HotelOwner {
@@ -117,6 +140,8 @@ model SubscriptionPackage {
   canBookLuxury        Boolean  @default(false)
   maxPremiumPerPeriod  Int      @default(0)
   maxLuxuryPerPeriod   Int      @default(0)
+
+  subscriptions Subscription[]
 }
 
 model Subscription {
@@ -132,6 +157,10 @@ model Subscription {
   compedReason       String?
   createdAt          DateTime  @default(now())
   corporateAccountId String?
+
+  user    User                @relation(fields: [userId], references: [id])
+  package SubscriptionPackage @relation(fields: [packageId], references: [id])
+  coupons Coupon[]
 }
 
 model Coupon {
@@ -154,6 +183,10 @@ model Coupon {
   priceUsd        Float?
   priceTzs        Float?
   exchangeRate    Float?
+
+  user         User   @relation(fields: [userId], references: [id])
+  hotel        Hotel  @relation(fields: [hotelId], references: [id])
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
 }
 
 model CouponBlackout {
@@ -163,6 +196,8 @@ model CouponBlackout {
   endDate   String
   reason    String?
   createdAt DateTime @default(now())
+
+  hotel Hotel @relation(fields: [hotelId], references: [id])
 }
 
 model Review {
@@ -178,6 +213,9 @@ model Review {
   repliedAt   DateTime?
   source      String   @default("busybeds")
   createdAt   DateTime @default(now())
+
+  hotel Hotel @relation(fields: [hotelId], references: [id])
+  user  User?  @relation(fields: [userId], references: [id])
 }
 
 model Favorite {
@@ -185,6 +223,9 @@ model Favorite {
   userId    String
   hotelId   String
   createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id])
+  hotel Hotel @relation(fields: [hotelId], references: [id])
 }
 
 model LoyaltyPoints {
@@ -193,6 +234,8 @@ model LoyaltyPoints {
   points    Int      @default(0)
   lifetime  Int      @default(0)
   updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model PointTransaction {
@@ -202,6 +245,8 @@ model PointTransaction {
   type        String
   description String
   createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model GiftCard {
@@ -231,6 +276,8 @@ model FlashDeal {
   isActive        Boolean   @default(true)
   createdBy       String?
   createdAt       DateTime  @default(now())
+
+  hotel Hotel @relation(fields: [hotelId], references: [id])
 }
 
 model StayRequest {
@@ -251,6 +298,9 @@ model StayRequest {
   declineReason String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  hotel Hotel @relation(fields: [hotelId], references: [id])
+  traveler User @relation(fields: [travelerId], references: [id])
 }
 
 model Message {
@@ -263,6 +313,9 @@ model Message {
   attachmentUrl String?
   isRead        Boolean  @default(false)
   createdAt     DateTime @default(now())
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
 }
 
 model Notification {
@@ -274,6 +327,8 @@ model Notification {
   link      String?
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model NotificationPreference {
@@ -303,6 +358,8 @@ model Referral {
   referredId String?
   usedAt     DateTime?
   createdAt  DateTime  @default(now())
+
+  referrer User @relation(fields: [referrerId], references: [id])
 }
 
 model ReferralEarning {
@@ -331,6 +388,8 @@ model Badge {
   userId    String
   type      String
   awardedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 model PriceAlert {

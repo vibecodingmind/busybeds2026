@@ -1,0 +1,2 @@
+'use client'; import { Card, CardContent } from '@/components/ui/card'; import { Compass } from 'lucide-react';
+export default function ThingsToDoPage() { return (<div className="container mx-auto px-4 py-8"><h1 className="text-3xl font-bold mb-6">Things to Do</h1><Card className="p-8 text-center"><Compass className="h-12 w-12 text-muted-foreground mx-auto mb-3"/><p className="text-muted-foreground">Discover activities and experiences near your hotel.</p></Card></div>); }
