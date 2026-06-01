@@ -12,19 +12,31 @@ export async function POST(request: NextRequest) {
     const session = await getSession();
     if (!session || session.role !== 'admin') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
 
-    const { placeId, tier = 'standard', partnershipStatus = 'LISTING_ONLY', city, country } = await request.json();
+    const { placeId, tier = 'standard', partnershipStatus = 'LISTING_ONLY', discountPercent = 0, city, country } = await request.json();
     if (!placeId) return NextResponse.json({ success: false, error: 'placeId required' }, { status: 400 });
+
+    // Check if already imported by googlePlaceId
+    const existingByPlaceId = await db.hotel.findFirst({ where: { googlePlaceId: placeId } });
+    if (existingByPlaceId) return NextResponse.json({ success: false, error: 'Hotel already imported from Google', data: existingByPlaceId }, { status: 409 });
 
     // Fetch details from Google
     const details = await getHotelDetails(placeId);
-    if (!details) return NextResponse.json({ success: false, error: 'Place not found' }, { status: 404 });
+    if (!details) return NextResponse.json({ success: false, error: 'Place not found on Google' }, { status: 404 });
 
     const name = details.name;
     const slug = generateSlug(name);
 
     // Check slug uniqueness
     const existing = await db.hotel.findUnique({ where: { slug } });
-    if (existing) return NextResponse.json({ success: false, error: 'Hotel with this name already exists' }, { status: 409 });
+    if (existing) return NextResponse.json({ success: false, error: 'Hotel with this name already exists', data: existing }, { status: 409 });
+
+    const isPartner = partnershipStatus === 'ACTIVE';
+    const finalDiscount = isPartner ? (discountPercent || 15) : 0;
+
+    // Collect all photos
+    const photos = details.photos || [];
+    const coverImage = photos[0] || details.photoUrl || null;
+    const imagesJson = JSON.stringify(photos.length > 0 ? photos : (details.photoUrl ? [details.photoUrl] : []));
 
     // Create hotel
     const hotel = await db.hotel.create({
@@ -34,8 +46,8 @@ export async function POST(request: NextRequest) {
         city: city || details.address?.split(',')[0]?.trim() || 'Unknown',
         country: country || details.address?.split(',').pop()?.trim() || 'Unknown',
         category: 'Hotel',
-        descriptionShort: `Imported from Google - ${name}`,
-        descriptionLong: `${name} is located at ${details.address || 'N/A'}. ${details.rating ? `Rated ${details.rating}/5 stars.` : ''}`,
+        descriptionShort: `Imported from Google Maps - ${name}`,
+        descriptionLong: `${name} is located at ${details.address || 'N/A'}. ${details.rating ? `Rated ${details.rating}/5 stars on Google.` : ''} ${details.phone ? `Contact: ${details.phone}` : ''}`,
         starRating: details.rating ? Math.round(details.rating) : 3,
         amenities: '[]',
         vibeTags: '[]',
@@ -43,14 +55,15 @@ export async function POST(request: NextRequest) {
         phone: details.phone || null,
         address: details.address || null,
         websiteUrl: details.website || null,
-        coverImage: details.photoUrl || null,
-        images: details.photoUrl ? JSON.stringify([details.photoUrl]) : '[]',
+        coverImage,
+        images: imagesJson,
         geoLat: details.lat || null,
         geoLng: details.lng || null,
+        googlePlaceId: placeId,
         tier,
         status: 'active',
-        partnershipStatus,
-        discountPercent: 15,
+        partnershipStatus: isPartner ? 'ACTIVE' : 'LISTING_ONLY',
+        discountPercent: finalDiscount,
         couponValidDays: 30,
       },
     });

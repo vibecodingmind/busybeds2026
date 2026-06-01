@@ -79,6 +79,7 @@ model Hotel {
   discountPercent  Int       @default(15)
   couponValidDays  Int       @default(30)
   geoLat           Float?
+  googlePlaceId   String?
   geoLng           Float?
   lastCouponAt     DateTime?
   createdAt        DateTime  @default(now())

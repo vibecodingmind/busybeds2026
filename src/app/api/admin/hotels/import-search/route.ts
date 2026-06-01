@@ -10,10 +10,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('query') || '';
     const city = searchParams.get('city') || '';
+    const region = searchParams.get('region') || '';
 
-    if (!query || !city) return NextResponse.json({ success: false, error: 'query and city required' }, { status: 400 });
+    if (!query) return NextResponse.json({ success: false, error: 'query required' }, { status: 400 });
 
-    const results = await searchHotels(query, city);
+    // Use region if provided and city is empty
+    const searchCity = city || (region && region !== 'All Regions' ? region : '');
+    const results = await searchHotels(query, searchCity);
     return NextResponse.json({ success: true, data: results });
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Search failed' }, { status: 500 });
