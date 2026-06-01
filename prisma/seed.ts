@@ -66,6 +66,28 @@ async function seed() {
     { name: 'Masai Mara Lodge', city: 'Narok', country: 'Kenya', tier: 'luxury', starRating: 5, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY', lat: -1.4833, lng: 35.0167 },
     { name: 'Usambara Mountain Lodge', city: 'Lushoto', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY', lat: -4.7833, lng: 38.2833 },
     { name: 'Mikumi Safari Lodge', city: 'Mikumi', country: 'Tanzania', tier: 'premium', starRating: 4, discountPercent: 0, category: 'Lodge', partnership: 'LISTING_ONLY', lat: -7.3333, lng: 36.9833 },
+    // More hotels across Africa with geo data
+    { name: 'Peacock Hotel Dar', city: 'Dar es Salaam', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 10, category: 'Hotel', partnership: 'ACTIVE', lat: -6.8160, lng: 39.2794 },
+    { name: 'Protea Hotel Dar', city: 'Dar es Salaam', country: 'Tanzania', tier: 'premium', starRating: 4, discountPercent: 15, category: 'Hotel', partnership: 'ACTIVE', lat: -6.7696, lng: 39.2542 },
+    { name: 'Jangwani Beach Hotel', city: 'Dar es Salaam', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 12, category: 'Hotel', partnership: 'ACTIVE', lat: -6.8135, lng: 39.2674 },
+    { name: 'White Sand Hotel', city: 'Dar es Salaam', country: 'Tanzania', tier: 'luxury', starRating: 5, discountPercent: 20, category: 'Resort', partnership: 'ACTIVE', lat: -6.7844, lng: 39.2719 },
+    { name: 'Kendwa Rocks Hotel', city: 'Kendwa', country: 'Zanzibar', tier: 'premium', starRating: 4, discountPercent: 16, category: 'Resort', partnership: 'ACTIVE', lat: -5.9581, lng: 39.5575 },
+    { name: 'Zuri Zanzibar', city: 'Kendwa', country: 'Zanzibar', tier: 'luxury', starRating: 5, discountPercent: 22, category: 'Resort', partnership: 'ACTIVE', lat: -5.9600, lng: 39.5550 },
+    { name: 'Park Hyatt Zanzibar', city: 'Stone Town', country: 'Zanzibar', tier: 'luxury', starRating: 5, discountPercent: 18, category: 'Hotel', partnership: 'ACTIVE', lat: -6.1637, lng: 39.1957 },
+    { name: 'Four Points Nairobi', city: 'Nairobi', country: 'Kenya', tier: 'premium', starRating: 4, discountPercent: 14, category: 'Hotel', partnership: 'ACTIVE', lat: -1.2905, lng: 36.8219 },
+    { name: 'Hemingways Nairobi', city: 'Nairobi', country: 'Kenya', tier: 'luxury', starRating: 5, discountPercent: 20, category: 'Hotel', partnership: 'ACTIVE', lat: -1.3416, lng: 36.7078 },
+    { name: 'Voyager Beach Resort', city: 'Mombasa', country: 'Kenya', tier: 'premium', starRating: 4, discountPercent: 16, category: 'Resort', partnership: 'ACTIVE', lat: -4.0430, lng: 39.6858 },
+    { name: 'Leopard Beach Resort', city: 'Diani', country: 'Kenya', tier: 'premium', starRating: 4, discountPercent: 15, category: 'Resort', partnership: 'ACTIVE', lat: -4.3167, lng: 39.5833 },
+    { name: 'Riad Arusha', city: 'Arusha', country: 'Tanzania', tier: 'standard', starRating: 3, discountPercent: 10, category: 'Hotel', partnership: 'PENDING', lat: -3.3700, lng: 36.6900 },
+    // Pending partner hotels
+    { name: 'Cape Town Lodge', city: 'Cape Town', country: 'South Africa', tier: 'standard', starRating: 3, discountPercent: 0, category: 'Hotel', partnership: 'PENDING', lat: -33.9249, lng: 18.4241 },
+    { name: 'Table Bay Hotel', city: 'Cape Town', country: 'South Africa', tier: 'luxury', starRating: 5, discountPercent: 0, category: 'Hotel', partnership: 'PENDING', lat: -33.9064, lng: 18.4221 },
+    { name: 'Protea Hotel Kampala', city: 'Kampala', country: 'Uganda', tier: 'premium', starRating: 4, discountPercent: 0, category: 'Hotel', partnership: 'PENDING', lat: 0.3122, lng: 32.5816 },
+    { name: 'Munyonyo Commonwealth Resort', city: 'Kampala', country: 'Uganda', tier: 'luxury', starRating: 5, discountPercent: 0, category: 'Resort', partnership: 'PENDING', lat: 0.2400, lng: 32.6500 },
+    { name: 'Kigali Marriott Hotel', city: 'Kigali', country: 'Rwanda', tier: 'luxury', starRating: 5, discountPercent: 0, category: 'Hotel', partnership: 'PENDING', lat: -1.9403, lng: 30.0586 },
+    { name: 'Radisson Blu Kigali', city: 'Kigali', country: 'Rwanda', tier: 'premium', starRating: 4, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY', lat: -1.9500, lng: 30.0600 },
+    { name: 'Hilton Addis Ababa', city: 'Addis Ababa', country: 'Ethiopia', tier: 'luxury', starRating: 5, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY', lat: 9.0250, lng: 38.7469 },
+    { name: 'Skylight Hotel Addis', city: 'Addis Ababa', country: 'Ethiopia', tier: 'premium', starRating: 4, discountPercent: 0, category: 'Hotel', partnership: 'LISTING_ONLY', lat: 9.0200, lng: 38.7500 },
   ];
 
   const hotels = [];

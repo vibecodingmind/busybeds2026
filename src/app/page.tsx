@@ -231,6 +231,9 @@ export default function HomePage() {
   const [activeTier, setActiveTier] = useState('all');
   const [activePropertyType, setActivePropertyType] = useState<string | null>(null);
   const [activeViewMode, setActiveViewMode] = useState<'list' | 'map'>('list');
+  const [nearbyHotels, setNearbyHotels] = useState<HotelType[]>([]);
+  const [showNearMe, setShowNearMe] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
   const categoryScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -364,13 +367,40 @@ export default function HomePage() {
               >
                 <Map className="h-3 w-3" /> Map
               </button>
-              <button className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 active:scale-95 transition-all active:text-[#0E5C3B]">
-                <Navigation className="h-3 w-3" /> Near Me
+              <button
+                onClick={async () => {
+                  if (showNearMe) { setShowNearMe(false); return; }
+                  setGettingLocation(true);
+                  navigator.geolocation?.getCurrentPosition(
+                    async (pos) => {
+                      try {
+                        const res = await fetch(`/api/hotels/nearby?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}&radius=50&limit=12`);
+                        const data = await res.json();
+                        setNearbyHotels(data.data || []);
+                        setShowNearMe(true);
+                      } catch {} finally { setGettingLocation(false); }
+                    },
+                    () => { setGettingLocation(false); alert('Location access denied'); },
+                    { enableHighAccuracy: false, timeout: 10000 }
+                  );
+                }}
+                className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all active:scale-95 ${
+                  showNearMe
+                    ? 'text-white bg-[#0E5C3B]'
+                    : 'text-gray-400 bg-gray-100 dark:bg-gray-800'
+                }`}
+              >
+                <Navigation className="h-3 w-3" /> {gettingLocation ? 'Locating...' : 'Near Me'}
               </button>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Near Me Section */}
+      {showNearMe && nearbyHotels.length > 0 && (
+        <HotelSection title="Near You" hotels={applyFilters(nearbyHotels)} loading={false} />
+      )}
 
       {/* Hotel Sections by City */}
       <div className="divide-y divide-gray-50 dark:divide-gray-800/50">

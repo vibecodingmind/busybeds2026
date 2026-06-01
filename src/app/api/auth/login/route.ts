@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { comparePassword, signToken } from '@/lib/auth'
+import { verifyRecaptcha } from '@/lib/recaptcha'
 
 const TOKEN_NAME = 'busybeds-token'
 
 const loginSchema = z.object({
   email: z.email(),
   password: z.string().min(1, 'Password is required'),
+  recaptchaToken: z.string().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -22,7 +24,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { email, password } = parsed.data
+    const { email, password, recaptchaToken } = parsed.data
+
+    // Verify reCAPTCHA if token provided
+    if (recaptchaToken && !(await verifyRecaptcha(recaptchaToken))) {
+      return NextResponse.json(
+        { success: false, error: 'reCAPTCHA verification failed' },
+        { status: 400 }
+      )
+    }
 
     // Find user by email
     const user = await db.user.findUnique({ where: { email } })

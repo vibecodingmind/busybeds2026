@@ -13,6 +13,7 @@ const ADMIN_NAV = [
   { href: '/admin/dashboard', icon: BarChart3, label: 'Dashboard' },
   { href: '/admin/users', icon: Users, label: 'Users' },
   { href: '/admin/hotels', icon: Building2, label: 'Hotels' },
+  { href: '/admin/hotels/import', icon: Globe, label: 'Import Hotels' },
   { href: '/admin/kyc', icon: Shield, label: 'KYC Review' },
   { href: '/admin/coupons', icon: Ticket, label: 'Coupons' },
   { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },

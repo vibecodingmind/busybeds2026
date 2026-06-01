@@ -1,101 +1,63 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { getSession } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { getSession } from '@/lib/auth';
+import { getHotelDetails } from '@/lib/googlePlaces';
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY || ''
+function generateSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession()
-    if (!session || session.role !== 'admin') {
-      return NextResponse.json({ success: false, error: 'Admin required' }, { status: 403 })
-    }
+    const session = await getSession();
+    if (!session || session.role !== 'admin') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
 
-    const { query, city, country, tier = 'standard', maxResults = 20 } = await request.json()
-    if (!query || !city) {
-      return NextResponse.json({ success: false, error: 'Query and city required' }, { status: 400 })
-    }
+    const { placeId, tier = 'standard', partnershipStatus = 'LISTING_ONLY', city, country } = await request.json();
+    if (!placeId) return NextResponse.json({ success: false, error: 'placeId required' }, { status: 400 });
 
-    // Search Google Places
-    const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query + ' in ' + city + ' ' + (country || ''))}&type=lodging&key=${PLACES_API_KEY}`
-    const searchRes = await fetch(searchUrl)
-    const searchData = await searchRes.json()
+    // Fetch details from Google
+    const details = await getHotelDetails(placeId);
+    if (!details) return NextResponse.json({ success: false, error: 'Place not found' }, { status: 404 });
 
-    if (searchData.status !== 'OK' && searchData.status !== 'ZERO_RESULTS') {
-      return NextResponse.json({ success: false, error: 'Google Places API error: ' + searchData.status }, { status: 500 })
-    }
+    const name = details.name;
+    const slug = generateSlug(name);
 
-    const results = searchData.results?.slice(0, maxResults) || []
-    const imported: any[] = []
-    const skipped: any[] = []
+    // Check slug uniqueness
+    const existing = await db.hotel.findUnique({ where: { slug } });
+    if (existing) return NextResponse.json({ success: false, error: 'Hotel with this name already exists' }, { status: 409 });
 
-    for (const place of results) {
-      // Check if hotel already exists
-      const existing = await db.hotel.findFirst({ where: { name: place.name, city } })
-      if (existing) {
-        skipped.push({ name: place.name, reason: 'Already exists' })
-        continue
-      }
+    // Create hotel
+    const hotel = await db.hotel.create({
+      data: {
+        name,
+        slug,
+        city: city || details.address?.split(',')[0]?.trim() || 'Unknown',
+        country: country || details.address?.split(',').pop()?.trim() || 'Unknown',
+        category: 'Hotel',
+        descriptionShort: `Imported from Google - ${name}`,
+        descriptionLong: `${name} is located at ${details.address || 'N/A'}. ${details.rating ? `Rated ${details.rating}/5 stars.` : ''}`,
+        starRating: details.rating ? Math.round(details.rating) : 3,
+        amenities: '[]',
+        vibeTags: '[]',
+        discountRules: '[]',
+        phone: details.phone || null,
+        address: details.address || null,
+        websiteUrl: details.website || null,
+        coverImage: details.photoUrl || null,
+        images: details.photoUrl ? JSON.stringify([details.photoUrl]) : '[]',
+        geoLat: details.lat || null,
+        geoLng: details.lng || null,
+        tier,
+        status: 'active',
+        partnershipStatus,
+        discountPercent: 15,
+        couponValidDays: 30,
+      },
+    });
 
-      const slug = place.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).slice(2, 6)
-
-      // Determine tier from star rating
-      const starRating = place.rating ? Math.round(place.rating) : 3
-      const hotelTier = tier || (starRating >= 5 ? 'luxury' : starRating >= 4 ? 'premium' : 'standard')
-
-      const hotel = await db.hotel.create({
-        data: {
-          name: place.name,
-          slug,
-          city,
-          country: country || 'Tanzania',
-          category: place.types?.includes('lodging') ? 'Hotel' : 'Lodge',
-          descriptionShort: `Located in ${city}. ${place.formatted_address || ''}`,
-          descriptionLong: `${place.name} is located in ${city}${country ? ', ' + country : ''}. ${place.formatted_address || 'Contact for more details.'}`,
-          starRating,
-          discountPercent: 0,
-          amenities: JSON.stringify([]),
-          vibeTags: JSON.stringify([]),
-          partnershipStatus: 'LISTING_ONLY',
-          status: 'active',
-          tier: hotelTier,
-          coverImage: place.photos?.[0]?.photo_reference
-            ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${place.photos[0].photo_reference}&key=${PLACES_API_KEY}`
-            : null,
-          images: JSON.stringify(place.photos?.slice(0, 5)?.map((p: any) =>
-            `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photoreference=${p.photo_reference}&key=${PLACES_API_KEY}`
-          ) || []),
-          geoLat: place.geometry?.location?.lat,
-          geoLng: place.geometry?.location?.lng,
-          phone: place.formatted_phone_number || null,
-          address: place.formatted_address || null,
-          websiteUrl: place.website || null,
-        },
-      })
-
-      // Create default rooms
-      for (const [ri, rn] of ['Standard Room', 'Deluxe Room', 'Suite'].entries()) {
-        await db.roomType.create({
-          data: {
-            hotelId: hotel.id,
-            name: rn,
-            bedType: ri === 2 ? 'King' : 'Queen',
-            sizeSqm: 25 + ri * 10,
-            pricePerNight: 70 + ri * 50,
-            maxGuests: ri === 2 ? 4 : 2,
-          },
-        })
-      }
-
-      imported.push({ id: hotel.id, name: hotel.name, tier: hotelTier })
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: { imported: imported.length, skipped: skipped.length, details: { imported, skipped } },
-    })
+    return NextResponse.json({ success: true, data: hotel }, { status: 201 });
   } catch (error) {
-    console.error('Hotel import error:', error)
-    return NextResponse.json({ success: false, error: 'Import failed' }, { status: 500 })
+    console.error('Hotel import error:', error);
+    return NextResponse.json({ success: false, error: 'Failed to import hotel' }, { status: 500 });
   }
 }

@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Star, Wifi, Car, Dumbbell, UtensilsCrossed, Waves, Phone, Globe, Heart, Share2, Clock, Ticket, Users, BedDouble, ArrowLeft, ChevronLeft } from 'lucide-react';
+import { MapPin, Star, Wifi, Car, Dumbbell, UtensilsCrossed, Waves, Phone, Globe, Heart, Share2, Clock, Ticket, Users, BedDouble, ArrowLeft, ChevronLeft, Send } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCurrency } from '@/context/CurrencyContext';
 import { parseJsonField } from '@/lib/parse';
+import GoogleMap from '@/components/GoogleMap';
+import { toast } from 'sonner';
 import type { Hotel, RoomType, Review } from '@/types';
 
 const AMENITY_ICONS: Record<string, any> = {
@@ -29,6 +31,8 @@ export default function HotelDetailPage() {
   const [generating, setGenerating] = useState(false);
   const [couponResult, setCouponResult] = useState<any>(null);
   const [activeImg, setActiveImg] = useState(0);
+  const [recommending, setRecommending] = useState(false);
+  const [showRecommendDialog, setShowRecommendDialog] = useState(false);
 
   useEffect(() => {
     async function fetchHotel() {
@@ -60,6 +64,26 @@ export default function HotelDetailPage() {
       }
     } catch { alert('Failed to generate coupon'); }
     finally { setGenerating(false); }
+  };
+
+  const handleRecommend = async () => {
+    if (!user) { router.push('/login'); return; }
+    setRecommending(true);
+    try {
+      const res = await fetch(`/api/hotels/${slug}/recommend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: '' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Recommendation submitted! We\'ll reach out to this hotel.');
+        setShowRecommendDialog(false);
+      } else {
+        toast.error(data.error || 'Failed to submit');
+      }
+    } catch { toast.error('Failed to submit recommendation'); }
+    finally { setRecommending(false); }
   };
 
   if (loading) return (
@@ -396,17 +420,37 @@ export default function HotelDetailPage() {
               <p className="text-xs text-gray-500">This hotel is not a partner yet</p>
               <p className="text-sm font-semibold text-[#C8932A]">Recommend for BusyBeds Partner Program</p>
             </div>
-            <Link href={`/hotels/${hotel.slug}?recommend=true`}>
-              <Button
-                className="bg-[#C8932A] hover:bg-[#b8841f] text-white rounded-xl h-12 px-5 text-sm font-semibold active:scale-95 transition-all"
-              >
-                <Heart className="mr-1.5 h-4 w-4" /> Recommend
-              </Button>
-            </Link>
+            <Button
+              className="bg-[#C8932A] hover:bg-[#b8841f] text-white rounded-xl h-12 px-5 text-sm font-semibold active:scale-95 transition-all"
+              onClick={() => { if (user) setShowRecommendDialog(true); else router.push('/login'); }}
+            >
+              <Heart className="mr-1.5 h-4 w-4" /> Recommend
+            </Button>
           </div>
         )}
         {!user && hotel.partnershipStatus === 'ACTIVE' && <p className="text-[10px] text-gray-400 text-center mt-1">Login required to generate coupons</p>}
       </div>
+
+      {/* Recommend Dialog */}
+      {showRecommendDialog && (
+        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onClick={() => setShowRecommendDialog(false)}>
+          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-[#C8932A]/10 flex items-center justify-center mx-auto mb-3">
+                <Send className="h-6 w-6 text-[#C8932A]" />
+              </div>
+              <p className="font-semibold text-lg mb-2">Recommend {hotel.name}</p>
+              <p className="text-sm text-gray-500 mb-4">We&apos;ll reach out to this hotel and invite them to join BusyBeds as a partner, so they can offer exclusive discount coupons.</p>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1 rounded-xl" onClick={() => setShowRecommendDialog(false)}>Cancel</Button>
+                <Button className="flex-1 bg-[#C8932A] hover:bg-[#b8841f] text-white rounded-xl" onClick={handleRecommend} disabled={recommending}>
+                  {recommending ? 'Sending...' : 'Submit'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Coupon Result Modal */}
       {couponResult && (

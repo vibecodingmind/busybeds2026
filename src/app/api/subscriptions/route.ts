@@ -4,12 +4,13 @@ import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { createCheckoutSession } from '@/lib/stripe';
 import { initiatePayment } from '@/lib/pesapal';
+import { createOrder as createPayPalOrder } from '@/lib/paypal';
 import { createNotification } from '@/lib/notifications';
 
 const subscribeSchema = z.object({
   packageId: z.string().min(1, 'Package ID is required'),
   billingCycle: z.enum(['monthly', 'annual']),
-  paymentMethod: z.enum(['stripe', 'pesapal']),
+  paymentMethod: z.enum(['stripe', 'pesapal', 'paypal']),
 });
 
 // POST /api/subscriptions - Create or get active subscription
@@ -214,6 +215,23 @@ export async function POST(request: NextRequest) {
         checkoutUrl: pesapalResult.redirectUrl,
         data: subscription,
         message: 'Redirect to Pesapal to complete payment',
+      });
+    }
+
+    if (paymentMethod === 'paypal') {
+      const paypalResult = await createPayPalOrder({
+        amount,
+        currency: 'USD',
+        description: `${pkg.name} - ${billingCycle} plan`,
+        customId: `${subscription.id}:${transaction.id}`,
+      });
+
+      return NextResponse.json({
+        success: true,
+        checkoutUrl: paypalResult.approveUrl,
+        orderId: paypalResult.orderId,
+        data: subscription,
+        message: 'Redirect to PayPal to complete payment',
       });
     }
 
