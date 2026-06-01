@@ -13,7 +13,6 @@ const NAV_GROUPS = [
     { href: '/admin/dashboard', icon: BarChart3, label: 'Dashboard' },
     { href: '/admin/users', icon: Users, label: 'Users' },
     { href: '/admin/hotels', icon: Building2, label: 'Hotels' },
-    { href: '/admin/hotels/import', icon: Globe, label: 'Import Hotels' },
   ]},
   { label: 'OPERATIONS', items: [
     { href: '/admin/coupons', icon: Ticket, label: 'Coupons' },

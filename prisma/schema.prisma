@@ -60,6 +60,7 @@ model Hotel {
   city             String
   country          String
   category         String    @default("Hotel")
+  region           String    @default("")
   descriptionShort String    @default("")
   descriptionLong  String    @default("")
   starRating       Int       @default(3)

@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const tier = searchParams.get('tier');
+    const category = searchParams.get('category');
     const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
@@ -17,23 +18,16 @@ export async function GET(request: NextRequest) {
     const where: any = {};
     if (status) where.status = status;
     if (tier) where.tier = tier;
-    if (search) where.OR = [{ name: { contains: search } }, { city: { contains: search } }];
+    if (category) where.category = category;
+    if (search) where.OR = [{ name: { contains: search, mode: 'insensitive' } }, { city: { contains: search, mode: 'insensitive' } }, { country: { contains: search, mode: 'insensitive' } }];
 
     const hotels = await db.hotel.findMany({
       where, orderBy: { createdAt: 'desc' }, skip: (page - 1) * limit, take: limit,
     });
     const total = await db.hotel.count({ where });
 
-    // Parse JSON string fields for client consumption
-    const parsedHotels = hotels.map((hotel: Record<string, unknown>) => ({
-      ...hotel,
-      amenities: typeof hotel.amenities === 'string' ? JSON.parse(hotel.amenities as string) : hotel.amenities || [],
-      vibeTags: typeof hotel.vibeTags === 'string' ? JSON.parse(hotel.vibeTags as string) : hotel.vibeTags || [],
-      images: typeof hotel.images === 'string' ? JSON.parse(hotel.images as string) : hotel.images || [],
-      discountRules: typeof hotel.discountRules === 'string' ? JSON.parse(hotel.discountRules as string) : hotel.discountRules || [],
-    }));
-
-    return NextResponse.json({ success: true, data: parsedHotels, total, page, totalPages: Math.ceil(total / limit) });
+    // Keep images as raw string for the admin list — client parses if needed
+    return NextResponse.json({ success: true, data: hotels, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) { return NextResponse.json({ success: false, error: 'Failed to fetch hotels' }, { status: 500 }); }
 }
 
@@ -43,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (!session || session.role !== 'admin') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
 
     const body = await request.json();
-    const { name, slug, city, country, tier, status, partnershipStatus, starRating, descriptionShort, descriptionLong, discountPercent, couponValidDays, phone, address, websiteUrl, coverImage } = body;
+    const { name, slug, city, country, category, region, tier, status, partnershipStatus, starRating, descriptionShort, descriptionLong, discountPercent, couponValidDays, phone, address, websiteUrl, coverImage } = body;
 
     if (!name || !city || !country) return NextResponse.json({ success: false, error: 'Name, city, and country are required' }, { status: 400 });
 
@@ -60,9 +54,11 @@ export async function POST(request: NextRequest) {
         slug: generatedSlug,
         city,
         country,
+        category: category || 'Hotel',
+        region: region || '',
         tier: tier || 'standard',
         status: status || 'active',
-        partnershipStatus: partnershipStatus || 'NONE',
+        partnershipStatus: partnershipStatus || 'LISTING_ONLY',
         starRating: starRating || 3,
         descriptionShort: descriptionShort || '',
         descriptionLong: descriptionLong || '',

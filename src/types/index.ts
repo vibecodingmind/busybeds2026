@@ -29,6 +29,7 @@ export interface Hotel {
   city: string;
   country: string;
   category: string;
+  region: string;
   descriptionShort: string;
   descriptionLong: string;
   starRating: number;
@@ -51,8 +52,6 @@ export interface Hotel {
   geoLng?: number;
   lastCouponAt?: string;
   // Google Places import fields
-  phone?: string;
-  address?: string;
   googlePlaceId?: string;
   importSource?: string;
   isPartner: boolean;

@@ -9,7 +9,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     if (!session || session.role !== 'admin') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
 
     const body = await request.json();
-    const { name, slug, city, country, tier, status, partnershipStatus, starRating, descriptionShort, descriptionLong, discountPercent, couponValidDays, phone, address, websiteUrl, coverImage } = body;
+    const { name, slug, city, country, category, region, tier, status, partnershipStatus, starRating, descriptionShort, descriptionLong, discountPercent, couponValidDays, phone, address, websiteUrl, coverImage } = body;
 
     // If slug is being changed, check uniqueness
     if (slug) {
@@ -24,6 +24,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         ...(slug !== undefined && { slug }),
         ...(city !== undefined && { city }),
         ...(country !== undefined && { country }),
+        ...(category !== undefined && { category }),
+        ...(region !== undefined && { region }),
         ...(tier !== undefined && { tier }),
         ...(status !== undefined && { status }),
         ...(partnershipStatus !== undefined && { partnershipStatus }),

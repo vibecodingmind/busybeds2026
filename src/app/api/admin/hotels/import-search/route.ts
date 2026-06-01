@@ -11,14 +11,16 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('query') || '';
     const city = searchParams.get('city') || '';
     const region = searchParams.get('region') || '';
+    const maxResults = parseInt(searchParams.get('maxResults') || '60');
 
     if (!query) return NextResponse.json({ success: false, error: 'query required' }, { status: 400 });
 
     // Use region if provided and city is empty
     const searchCity = city || (region && region !== 'All Regions' ? region : '');
-    const results = await searchHotels(query, searchCity);
+    const results = await searchHotels(query, searchCity, maxResults);
     return NextResponse.json({ success: true, data: results });
   } catch (error) {
+    console.error('Import search error:', error);
     return NextResponse.json({ success: false, error: 'Search failed' }, { status: 500 });
   }
 }

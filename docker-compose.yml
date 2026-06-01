@@ -35,6 +35,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    volumes:
+      - busybeds-uploads:/app/public/uploads
     deploy:
       resources:
         limits:
@@ -70,6 +72,10 @@ services:
 
 volumes:
   busybeds-pgdata:
+    driver: local
+    labels:
+      - "com.busybeds.app=busybeds"
+  busybeds-uploads:
     driver: local
     labels:
       - "com.busybeds.app=busybeds"

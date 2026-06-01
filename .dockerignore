@@ -22,3 +22,4 @@ add-new-app.sh
 update-busybeds.sh
 quick-install.sh
 .github/
+public/uploads/
