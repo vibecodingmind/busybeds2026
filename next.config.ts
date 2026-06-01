@@ -4,14 +4,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  output: "standalone",
   reactStrictMode: false,
-  turbopack: {
-    root: "..",
-  },
   allowedDevOrigins: [
     "preview-chat-a104d975-f463-479b-8fd6-c85ddc8e186a.space-z.ai",
     ".space-z.ai",

@@ -5,14 +5,17 @@ import { createNotification } from '@/lib/notifications';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ success: false, error: 'Auth required' }, { status: 401 });
 
-    const { slug } = await params;
-    const hotel = await db.hotel.findUnique({ where: { slug } });
+    const { id } = await params;
+    // Try to find by slug first (since 'id' param can be a slug from the frontend), then by id
+    const hotel = await db.hotel.findFirst({
+      where: { OR: [{ slug: id }, { id }] }
+    });
     if (!hotel) return NextResponse.json({ success: false, error: 'Hotel not found' }, { status: 404 });
 
     const body = await request.json().catch(() => ({}));
