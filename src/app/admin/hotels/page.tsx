@@ -62,6 +62,9 @@ import {
   Tent,
   Waves,
   Building,
+  EyeOff,
+  Eye,
+  Trash,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { COUNTRIES, CITIES, HOTEL_TYPES } from '@/lib/locations';
@@ -239,6 +242,12 @@ export default function AdminHotelsPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate' | 'delete' | null>(null);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+
   // Import state
   const [importQuery, setImportQuery] = useState('');
   const [importCity, setImportCity] = useState('');
@@ -290,6 +299,7 @@ export default function AdminHotelsPage() {
 
   useEffect(() => {
     setPage(1);
+    setSelectedIds(new Set()); // Clear selection when filters change
   }, [search, statusFilter, tierFilter, categoryFilter, citySearch]);
 
   /* ─── Auto-detect region when country changes in Add form ─── */
@@ -571,6 +581,69 @@ export default function AdminHotelsPage() {
 
   const selectedCount = importResults.filter(r => r.selected).length;
 
+  /* ─── Bulk action helpers ─── */
+  const toggleHotelSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllHotels = () => {
+    const visibleHotelIds = hotels
+      .filter(h => partnershipFilter === 'all' || h.partnershipStatus === partnershipFilter)
+      .map(h => h.id);
+
+    if (visibleHotelIds.every(id => selectedIds.has(id))) {
+      // Deselect all visible
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        visibleHotelIds.forEach(id => next.delete(id));
+        return next;
+      });
+    } else {
+      // Select all visible
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        visibleHotelIds.forEach(id => next.add(id));
+        return next;
+      });
+    }
+  };
+
+  const allVisibleSelected = (() => {
+    const visibleHotelIds = hotels
+      .filter(h => partnershipFilter === 'all' || h.partnershipStatus === partnershipFilter);
+    return visibleHotelIds.length > 0 && visibleHotelIds.every(h => selectedIds.has(h.id));
+  })();
+
+  const handleBulkAction = async () => {
+    if (!bulkAction || selectedIds.size === 0) return;
+    setBulkProcessing(true);
+    try {
+      const res = await fetch('/api/admin/hotels/bulk-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: bulkAction, hotelIds: Array.from(selectedIds) }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        toast.error(data.error || 'Bulk action failed');
+        return;
+      }
+      toast.success(data.message);
+      setSelectedIds(new Set());
+      setBulkAction(null);
+      setBulkConfirmOpen(false);
+      fetchHotels();
+    } catch {
+      toast.error('Something went wrong');
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
   /* ─── Render ─── */
   return (
     <div>
@@ -664,6 +737,104 @@ export default function AdminHotelsPage() {
             </Select>
           </div>
 
+          {/* Bulk Action Bar */}
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-3 p-3 mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <div className="flex items-center gap-2">
+                <CheckSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                  {selectedIds.size} hotel{selectedIds.size !== 1 ? 's' : ''} selected
+                </span>
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-emerald text-emerald hover:bg-emerald hover:text-white"
+                  onClick={() => { setBulkAction('activate'); setBulkConfirmOpen(true); }}
+                  disabled={bulkProcessing}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Activate
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white"
+                  onClick={() => { setBulkAction('deactivate'); setBulkConfirmOpen(true); }}
+                  disabled={bulkProcessing}
+                >
+                  <EyeOff className="h-4 w-4 mr-1" />
+                  Deactivate
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive text-destructive hover:bg-destructive hover:text-white"
+                  onClick={() => { setBulkAction('delete'); setBulkConfirmOpen(true); }}
+                  disabled={bulkProcessing}
+                >
+                  <Trash className="h-4 w-4 mr-1" />
+                  Delete
+                </Button>
+                <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedIds(new Set())}
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Bulk Action Confirm Dialog */}
+          <AlertDialog open={bulkConfirmOpen} onOpenChange={setBulkConfirmOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {bulkAction === 'delete' ? 'Delete Selected Hotels' : bulkAction === 'activate' ? 'Activate Selected Hotels' : 'Deactivate Selected Hotels'}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {bulkAction === 'delete' ? (
+                    <>Are you sure you want to <strong>permanently delete</strong> {selectedIds.size} hotel{selectedIds.size !== 1 ? 's' : ''}? This action cannot be undone and will remove all associated data including coupons, reviews, and room types.</>
+                  ) : bulkAction === 'activate' ? (
+                    <>Are you sure you want to <strong>activate</strong> {selectedIds.size} hotel{selectedIds.size !== 1 ? 's' : ''}? They will become visible to users on the platform.</>
+                  ) : (
+                    <>Are you sure you want to <strong>deactivate</strong> {selectedIds.size} hotel{selectedIds.size !== 1 ? 's' : ''}? They will be hidden from users on the platform.</>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={bulkProcessing}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className={
+                    bulkAction === 'delete'
+                      ? 'bg-destructive hover:bg-destructive/90 text-white'
+                      : bulkAction === 'activate'
+                      ? 'bg-emerald hover:bg-emerald/90 text-white'
+                      : 'bg-amber-500 hover:bg-amber-600 text-white'
+                  }
+                  onClick={handleBulkAction}
+                  disabled={bulkProcessing}
+                >
+                  {bulkProcessing ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</>
+                  ) : (
+                    <>
+                      {bulkAction === 'delete' && <Trash className="h-4 w-4 mr-2" />}
+                      {bulkAction === 'activate' && <Eye className="h-4 w-4 mr-2" />}
+                      {bulkAction === 'deactivate' && <EyeOff className="h-4 w-4 mr-2" />}
+                      {bulkAction === 'delete' ? 'Delete All' : bulkAction === 'activate' ? 'Activate All' : 'Deactivate All'}
+                    </>
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           {/* Hotel List */}
           {loading ? (
             <div className="space-y-3">
@@ -679,6 +850,23 @@ export default function AdminHotelsPage() {
             </Card>
           ) : (
             <div className="space-y-2">
+              {/* Select All Header Row */}
+              <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <button
+                  onClick={toggleSelectAllHotels}
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {allVisibleSelected ? (
+                    <CheckSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                  {allVisibleSelected ? 'Deselect All' : 'Select All'}
+                </button>
+                <span className="text-xs text-muted-foreground">
+                  {hotels.filter(h => partnershipFilter === 'all' || h.partnershipStatus === partnershipFilter).length} hotels on this page
+                </span>
+              </div>
               {hotels
                 .filter((h) => {
                   if (partnershipFilter !== 'all' && h.partnershipStatus !== partnershipFilter) return false;
@@ -692,8 +880,23 @@ export default function AdminHotelsPage() {
                   })();
 
                   return (
-                    <Card key={hotel.id} className="p-4 hover:shadow-md transition-shadow">
+                    <Card key={hotel.id} className={`p-4 hover:shadow-md transition-shadow ${selectedIds.has(hotel.id) ? 'ring-2 ring-blue-400 bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
                       <div className="flex items-center gap-4">
+                        {/* Selection Checkbox */}
+                        <button
+                          onClick={() => toggleHotelSelect(hotel.id)}
+                          className={`shrink-0 w-6 h-6 rounded flex items-center justify-center transition-colors ${
+                            selectedIds.has(hotel.id)
+                              ? 'text-blue-600 dark:text-blue-400'
+                              : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                          }`}
+                        >
+                          {selectedIds.has(hotel.id) ? (
+                            <CheckSquare className="h-5 w-5" />
+                          ) : (
+                            <Square className="h-5 w-5" />
+                          )}
+                        </button>
                         {/* Thumbnail */}
                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0">
                           {hotel.coverImage ? (
