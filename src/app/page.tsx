@@ -279,29 +279,10 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0F1117] page-enter">
-      {/* Filter Section - App Style */}
+      {/* Filter Section - Single Row: Tiers + Categories + View toggles */}
       <section className="bg-white dark:bg-[#1a1d27] border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-8 py-2.5">
-
-          {/* Row 1: Tier chips */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-            {TIERS.map(tier => (
-              <button
-                key={tier.id}
-                onClick={() => setActiveTier(tier.id)}
-                className={`px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all active:scale-95 ${
-                  activeTier === tier.id
-                    ? 'bg-[#0E5C3B] text-white shadow-sm'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:bg-gray-200'
-                }`}
-              >
-                {tier.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Row 2: Categories (limited 6 visible) + scroll arrows + MAP/NEAR ME/LIST */}
-          <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Left scroll arrow */}
             <button
               onClick={() => scrollCategories('left')}
@@ -310,28 +291,32 @@ export default function HomePage() {
               <ChevronLeft className="h-3.5 w-3.5 text-gray-500" />
             </button>
 
-            {/* Scrollable categories - show 6 visible, rest by scrolling */}
+            {/* Scrollable: Tiers + divider + Categories (6 visible, rest on scroll) */}
             <div
               ref={categoryScrollRef}
               className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scroll-smooth scrollbar-hide flex-1"
               style={{ scrollbarWidth: 'none' }}
             >
-              {PROPERTY_TYPES.slice(0, VISIBLE_CATEGORIES).map(pt => (
+              {/* Tiers first */}
+              {TIERS.map(tier => (
                 <button
-                  key={pt.id}
-                  onClick={() => setActivePropertyType(activePropertyType === pt.id ? null : pt.id)}
-                  className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm whitespace-nowrap transition-all active:scale-95 shrink-0 ${
-                    activePropertyType === pt.id
-                      ? 'bg-[#C8932A] text-white shadow-sm'
+                  key={tier.id}
+                  onClick={() => setActiveTier(tier.id)}
+                  className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all active:scale-95 shrink-0 ${
+                    activeTier === tier.id
+                      ? 'bg-[#0E5C3B] text-white shadow-sm'
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:bg-gray-200'
                   }`}
                 >
-                  <pt.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  {pt.label}
+                  {tier.label}
                 </button>
               ))}
-              {/* Extra categories visible only on scroll */}
-              {PROPERTY_TYPES.slice(VISIBLE_CATEGORIES).map(pt => (
+
+              {/* Divider between tiers and categories */}
+              <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 shrink-0" />
+
+              {/* Property type categories - only 6 shown, rest scrolled into view */}
+              {PROPERTY_TYPES.map(pt => (
                 <button
                   key={pt.id}
                   onClick={() => setActivePropertyType(activePropertyType === pt.id ? null : pt.id)}
