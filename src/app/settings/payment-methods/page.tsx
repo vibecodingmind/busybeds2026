@@ -1,18 +1,14 @@
 'use client';
-import { Card, CardContent } from '@/components/ui/card';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 
-export default function SettingsPaymentMethodsPage() {
+import { Card, CardContent } from '@/components/ui/card';
+import { CreditCard } from 'lucide-react';
+
+export default function PaymentMethodsSettingsPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
-      <Link href="/settings" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="h-4 w-4 mr-1" />Settings
-      </Link>
-      <h1 className="text-3xl font-bold mb-6">Payment Methods</h1>
-      <Card className="p-8 text-center">
-        <p className="text-muted-foreground">Manage your payment methods settings here.</p>
-      </Card>
-    </div>
+    <Card className="p-6">
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><CreditCard className="h-5 w-5" /> Payment Methods</h2>
+      <p className="text-muted-foreground">Manage your payment methods for subscriptions.</p>
+      <div className="mt-4 p-4 bg-muted rounded-lg text-sm text-muted-foreground">No payment methods saved yet. Add a card when subscribing to a plan.</div>
+    </Card>
   );
 }

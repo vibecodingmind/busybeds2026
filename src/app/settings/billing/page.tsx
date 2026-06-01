@@ -1,2 +1,14 @@
-'use client'; import { Card, CardContent } from '@/components/ui/card'; import Link from 'next/link'; import { ArrowLeft } from 'lucide-react';
-export default function SettingsbillingPage() { return (<div className="container mx-auto px-4 py-8 max-w-2xl"><Link href="/settings" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"><ArrowLeft className="h-4 w-4 mr-1"/>Settings</Link><h1 className="text-3xl font-bold mb-6 capitalize">billing</h1><Card className="p-8 text-center"><p className="text-muted-foreground">Manage your billing settings here.</p></Card></div>); }
+'use client';
+
+import { Card, CardContent } from '@/components/ui/card';
+import { Wallet } from 'lucide-react';
+
+export default function BillingSettingsPage() {
+  return (
+    <Card className="p-6">
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2"><Wallet className="h-5 w-5" /> Billing</h2>
+      <p className="text-muted-foreground">Manage your billing settings, view payment history, and update billing information.</p>
+      <div className="mt-4 p-4 bg-muted rounded-lg text-sm text-muted-foreground">No billing records yet. Subscribe to a plan to see billing details.</div>
+    </Card>
+  );
+}

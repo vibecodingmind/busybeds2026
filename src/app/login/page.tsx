@@ -11,9 +11,9 @@ import { useRouter } from 'next/navigation';
 import { Mail, Lock, ArrowRight, Shield, User, Building2, Zap } from 'lucide-react';
 
 const DEMO_ACCOUNTS = [
-  { label: 'Admin', email: 'admin@busybeds.com', password: 'Admin123!', role: 'Full access to admin panel', icon: Shield, color: 'bg-red-500' },
-  { label: 'Hotel Owner', email: 'owner@busybeds.com', password: 'Owner123!', role: 'Manage hotel listings & analytics', icon: Building2, color: 'bg-[#0E5C3B]' },
-  { label: 'Guest', email: 'amina.hassan@example.com', password: 'Password123!', role: 'Browse hotels, generate coupons', icon: User, color: 'bg-[#C8932A]' },
+  { label: 'Admin', email: 'admin@busybeds.com', password: 'Admin123!', role: 'admin', description: 'Full access to admin panel', icon: Shield, color: 'bg-red-500' },
+  { label: 'Hotel Owner', email: 'owner@busybeds.com', password: 'Owner123!', role: 'owner', description: 'Manage hotel listings & analytics', icon: Building2, color: 'bg-[#0E5C3B]' },
+  { label: 'Guest', email: 'amina.hassan@example.com', password: 'Password123!', role: 'traveler', description: 'Browse hotels, generate coupons', icon: User, color: 'bg-[#C8932A]' },
 ];
 
 export default function LoginPage() {
@@ -24,20 +24,32 @@ export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
 
+  const getRedirectPath = (role: string) => {
+    if (role === 'admin') return '/admin/dashboard';
+    if (role === 'owner' || role === 'manager') return '/owner/dashboard';
+    return '/profile';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     const result = await login(email, password);
-    if (result.success) { router.push('/profile'); } else { setError(result.error || 'Login failed'); }
+    if (result.success) {
+      const meRes = await fetch('/api/auth/me');
+      const meData = await meRes.json();
+      router.push(getRedirectPath(meData.data?.role || 'traveler'));
+    } else { setError(result.error || 'Login failed'); }
     setLoading(false);
   };
 
-  const handleDemoLogin = async (demoEmail: string, demoPassword: string) => {
+  const handleDemoLogin = async (demoEmail: string, demoPassword: string, expectedRole: string) => {
     setError('');
     setLoading(true);
     const result = await login(demoEmail, demoPassword);
-    if (result.success) { router.push('/profile'); } else { setError(result.error || 'Demo login failed'); }
+    if (result.success) {
+      router.push(getRedirectPath(expectedRole));
+    } else { setError(result.error || 'Demo login failed'); }
     setLoading(false);
   };
 
@@ -108,7 +120,7 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {DEMO_ACCOUNTS.map(account => (
-              <button key={account.label} onClick={() => handleDemoLogin(account.email, account.password)} disabled={loading}
+              <button key={account.label} onClick={() => handleDemoLogin(account.email, account.password, account.role)} disabled={loading}
                 className="w-full flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-[0.98] transition-all text-left disabled:opacity-50">
                 <div className={`w-10 h-10 rounded-full ${account.color} flex items-center justify-center shrink-0`}>
                   <account.icon className="h-5 w-5 text-white" />
@@ -118,7 +130,7 @@ export default function LoginPage() {
                     <p className="font-semibold text-sm text-gray-900 dark:text-white">{account.label}</p>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-mono">{account.email}</span>
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{account.role}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{account.description}</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-gray-400 shrink-0" />
               </button>
