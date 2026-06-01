@@ -1,262 +1,416 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, MapPin, Star, ArrowRight, Check, Zap, Shield, Users, Globe, ChevronRight, Building2 } from 'lucide-react';
-import type { Hotel, SubscriptionPackage, FAQ } from '@/types';
+import {
+  Search, MapPin, Star, Heart, ShoppingCart, ChevronLeft, ChevronRight,
+  SlidersHorizontal, Map, List, Navigation, Hotel, Castle, Palmtree,
+  Home, Building2, Waves, TreePalm, Tent, Mountain, Landmark
+} from 'lucide-react';
+import type { Hotel as HotelType } from '@/types';
 import { parseJsonField } from '@/lib/parse';
 
-const PLAN_FEATURES = [
-  { name: 'Explorer', price: 'Free', coupons: '1 total', tiers: 'Standard', highlight: false },
-  { name: 'Starter', price: '$9.99/mo', coupons: '5/month', tiers: 'Standard + Premium', highlight: false },
-  { name: 'Pro', price: '$19.99/mo', coupons: '15/month', tiers: 'All including Luxury', highlight: true },
-  { name: 'Premium', price: '$34.99/mo', coupons: 'Unlimited', tiers: 'All + Exclusive', highlight: false },
+// Category icons for the filter bar
+const CATEGORIES = [
+  { id: 'all', label: 'All', icon: null },
+  { id: 'standard', label: 'Standard', icon: null },
+  { id: 'premium', label: 'Premium', icon: null },
+  { id: 'luxury', label: 'Luxury', icon: null },
 ];
 
-const HOW_IT_WORKS = [
-  { step: '1', icon: Search, title: 'Find Your Hotel', desc: 'Browse hundreds of partnered hotels across Africa and find your perfect stay.' },
-  { step: '2', icon: Zap, title: 'Generate a Coupon', desc: 'Subscribe to a plan and instantly generate a QR-code discount coupon for your chosen hotel.' },
-  { step: '3', icon: Shield, title: 'Save at Check-in', desc: 'Show your coupon at reception and enjoy exclusive member discounts on your stay.' },
+const PROPERTY_TYPES = [
+  { id: 'hotels', label: 'Hotels', icon: Hotel },
+  { id: 'resort', label: 'Resort', icon: Palmtree },
+  { id: 'apartments', label: 'Apartments', icon: Building2 },
+  { id: 'villa', label: 'Villa', icon: Castle },
+  { id: 'apartment', label: 'Apartment', icon: Home },
+  { id: 'beachfront', label: 'Beachfront', icon: Waves },
+  { id: 'safari', label: 'Safari', icon: TreePalm },
+  { id: 'camping', label: 'Camping', icon: Tent },
+  { id: 'mountain', label: 'Mountain', icon: Mountain },
+  { id: 'historic', label: 'Historic', icon: Landmark },
 ];
+
+// Section grouping - cities to display as sections
+const CITY_SECTIONS = [
+  { title: 'Where to stay in Arusha', city: 'Arusha' },
+  { title: 'Available in Dar es Salaam', city: 'Dar es Salaam' },
+  { title: 'Popular stays in Zanzibar', city: 'Zanzibar' },
+  { title: 'Discover in Dodoma', city: 'Dodoma' },
+  { title: 'Top picks in Nairobi', city: 'Nairobi' },
+  { title: 'Best in Mombasa', city: 'Mombasa' },
+];
+
+// Image carousel within a card
+function HotelCard({ hotel }: { hotel: HotelType }) {
+  const [currentImg, setCurrentImg] = useState(0);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const images = parseJsonField<string[]>(hotel.images);
+  const displayImages = images.length > 0 ? images : hotel.coverImage ? [hotel.coverImage] : [];
+  const hasMultiple = displayImages.length > 1;
+
+  return (
+    <div className="group cursor-pointer min-w-[260px] max-w-[300px] w-full shrink-0 snap-start">
+      {/* Image Container */}
+      <Link href={`/hotels/${hotel.slug}`}>
+        <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100">
+          {displayImages.length > 0 ? (
+            <img
+              src={displayImages[currentImg] || hotel.coverImage}
+              alt={hotel.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-5xl bg-gradient-to-br from-[#0E5C3B]/10 to-[#C8932A]/10">
+              🏨
+            </div>
+          )}
+
+          {/* Discount Badge */}
+          {hotel.discountPercent > 0 && (
+            <Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-md shadow">
+              {hotel.discountPercent}% OFF
+            </Badge>
+          )}
+
+          {/* Image carousel navigation */}
+          {hasMultiple && (
+            <>
+              {currentImg > 0 && (
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentImg(Math.max(0, currentImg - 1)); }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition opacity-0 group-hover:opacity-100"
+                >
+                  <ChevronLeft className="h-4 w-4 text-gray-700" />
+                </button>
+              )}
+              {currentImg < displayImages.length - 1 && (
+                <button
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentImg(Math.min(displayImages.length - 1, currentImg + 1)); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition opacity-0 group-hover:opacity-100"
+                >
+                  <ChevronRight className="h-4 w-4 text-gray-700" />
+                </button>
+              )}
+
+              {/* Dots */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                {displayImages.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCurrentImg(idx); }}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === currentImg ? 'bg-white' : 'bg-white/50'}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Heart & Cart Icons */}
+          <div className="absolute top-3 right-3 flex gap-1.5">
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsFavorited(!isFavorited); }}
+              className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white shadow-sm transition"
+            >
+              <Heart className={`h-4 w-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+            </button>
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white shadow-sm transition"
+            >
+              <ShoppingCart className="h-4 w-4 text-gray-600" />
+            </button>
+          </div>
+        </div>
+      </Link>
+
+      {/* Info */}
+      <div className="mt-2.5 px-0.5">
+        <Link href={`/hotels/${hotel.slug}`}>
+          <h3 className="font-semibold text-[15px] text-gray-900 dark:text-gray-100 leading-tight truncate hover:text-[#0E5C3B] transition-colors">
+            {hotel.name}
+          </h3>
+        </Link>
+        <div className="flex items-center gap-1 mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <MapPin className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">{hotel.city}, {hotel.country}</span>
+        </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <div className="flex items-center gap-0.5">
+            {Array.from({ length: hotel.starRating }).map((_, i) => (
+              <Star key={i} className="h-3 w-3 fill-[#C8932A] text-[#C8932A]" />
+            ))}
+          </div>
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400">
+            {hotel.tier}
+          </Badge>
+        </div>
+        <Link href={`/hotels/${hotel.slug}`}>
+          <Button
+            variant="outline"
+            className="mt-2.5 w-full text-sm font-medium text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-[#0E5C3B] hover:text-white hover:border-[#0E5C3B] rounded-lg transition-colors"
+          >
+            👍 Request coupons
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// Loading skeleton for a card
+function CardSkeleton() {
+  return (
+    <div className="min-w-[260px] max-w-[300px] w-full shrink-0">
+      <Skeleton className="aspect-[4/3] rounded-xl" />
+      <div className="mt-2.5 space-y-2 px-0.5">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-3 w-1/2" />
+        <Skeleton className="h-8 w-full rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
+// Horizontal scrollable section
+function HotelSection({ title, hotels, loading }: { title: string; hotels: HotelType[]; loading: boolean }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const scrollAmount = 320;
+    scrollRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <section className="py-6">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => scroll('left')}
+              className="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            >
+              <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            </button>
+            <button
+              onClick={() => scroll('right')}
+              className="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            >
+              <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+            </button>
+          </div>
+        </div>
+
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 scrollbar-hide"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)
+          ) : hotels.length > 0 ? (
+            hotels.map(hotel => <HotelCard key={hotel.id} hotel={hotel} />)
+          ) : (
+            <div className="text-sm text-gray-400 py-8">No hotels available in this area yet.</div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function HomePage() {
-  const [hotels, setHotels] = useState<Hotel[]>([]);
-  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [allHotels, setAllHotels] = useState<HotelType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [activePropertyType, setActivePropertyType] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchHotels() {
       try {
-        const [hotelsRes, faqRes] = await Promise.all([
-          fetch('/api/hotels?limit=6&sort=createdAt'),
-          fetch('/api/faq'),
-        ]);
-        if (hotelsRes.ok) {
-          const hData = await hotelsRes.json();
-          setHotels(hData.data || []);
-        }
-        if (faqRes.ok) {
-          const fData = await faqRes.json();
-          setFaqs((fData.data || []).slice(0, 4));
+        const res = await fetch('/api/hotels?limit=50&sort=createdAt');
+        if (res.ok) {
+          const data = await res.json();
+          setAllHotels(data.data || []);
         }
       } catch {} finally { setLoading(false); }
     }
-    fetchData();
+    fetchHotels();
   }, []);
 
+  // Filter hotels by category (tier)
+  const filterByCategory = (hotels: HotelType[]) => {
+    if (activeCategory === 'all') return hotels;
+    return hotels.filter(h => h.tier?.toLowerCase() === activeCategory);
+  };
+
+  // Filter by search query
+  const filterBySearch = (hotels: HotelType[]) => {
+    if (!searchQuery.trim()) return hotels;
+    const q = searchQuery.toLowerCase();
+    return hotels.filter(h =>
+      h.name.toLowerCase().includes(q) ||
+      h.city.toLowerCase().includes(q) ||
+      h.country.toLowerCase().includes(q)
+    );
+  };
+
+  const applyFilters = (hotels: HotelType[]) => filterBySearch(filterByCategory(hotels));
+
+  // Group hotels by city sections
+  const getHotelsForCity = (city: string) => {
+    return applyFilters(allHotels.filter(h =>
+      h.city?.toLowerCase().includes(city.toLowerCase())
+    )).slice(0, 8);
+  };
+
+  // Get any remaining hotels not in the city sections for a "More to explore" section
+  const sectionCities = CITY_SECTIONS.map(s => s.city.toLowerCase());
+  const otherHotels = applyFilters(allHotels.filter(h =>
+    !sectionCities.some(c => h.city?.toLowerCase().includes(c))
+  )).slice(0, 8);
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      window.location.href = `/hotels?search=${encodeURIComponent(searchQuery)}`;
+    }
+  };
+
   return (
-    <div className="flex flex-col">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald via-emerald/90 to-emerald/80 text-emerald-foreground">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-30" />
-        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-          <div className="max-w-3xl mx-auto text-center">
-            <Badge className="mb-4 bg-gold/20 text-gold-foreground border-gold/30">🌍 Africa&apos;s #1 Hotel Discount Platform</Badge>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Save Up to <span className="text-gold">50%</span> on Hotels Across Africa
-            </h1>
-            <p className="text-lg md:text-xl mb-8 opacity-90">
-              Get exclusive discount coupons for premium hotels in Tanzania, Kenya, Zanzibar and more. One membership, unlimited savings.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-foreground/50" />
-                <Input
-                  placeholder="Search hotels in Dar es Salaam..."
-                  className="pl-10 h-12 bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') window.location.href = `/hotels?search=${encodeURIComponent(searchQuery)}`; }}
-                />
-              </div>
-              <Link href={searchQuery ? `/hotels?search=${encodeURIComponent(searchQuery)}` : '/hotels'}>
-                <Button size="lg" className="h-12 bg-gold hover:bg-gold/90 text-gold-foreground font-semibold px-8">
-                  Search <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
+    <div className="min-h-screen bg-white dark:bg-[#0F1117]">
+      {/* Search Bar Section */}
+      <section className="bg-white dark:bg-[#1a1d27] border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-4">
+          {/* Search Input */}
+          <div className="flex items-center gap-2 max-w-2xl mx-auto">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search by hotel name, city..."
+                className="pl-10 h-11 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-full text-sm focus:ring-2 focus:ring-[#0E5C3B] focus:border-[#0E5C3B]"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
+              />
             </div>
+            <Button variant="ghost" size="icon" className="h-11 w-11 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800">
+              <SlidersHorizontal className="h-4 w-4" />
+            </Button>
+            <Button
+              onClick={handleSearch}
+              className="h-11 px-6 rounded-full bg-red-500 hover:bg-red-600 text-white text-sm font-medium"
+            >
+              <Search className="h-4 w-4 mr-1.5" /> Search
+            </Button>
           </div>
-        </div>
-      </section>
 
-      {/* Stats */}
-      <section className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            {[
-              { icon: Building2, label: 'Hotels Listed', value: '200+' },
-              { icon: Users, label: 'Happy Travelers', value: '10,000+' },
-              { icon: Globe, label: 'Countries', value: '10+' },
-              { icon: Zap, label: 'Coupons Generated', value: '50,000+' },
-            ].map(stat => (
-              <div key={stat.label} className="flex flex-col items-center gap-1">
-                <stat.icon className="h-6 w-6 text-emerald mb-1" />
-                <span className="text-2xl font-bold">{stat.value}</span>
-                <span className="text-xs text-muted-foreground">{stat.label}</span>
-              </div>
+          {/* Category Tabs */}
+          <div className="flex items-center gap-2 mt-4 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  activeCategory === cat.id
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+            {PROPERTY_TYPES.map(pt => (
+              <button
+                key={pt.id}
+                onClick={() => setActivePropertyType(activePropertyType === pt.id ? null : pt.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-colors ${
+                  activePropertyType === pt.id
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
+              >
+                <pt.icon className="h-4 w-4" />
+                {pt.label}
+              </button>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* How It Works */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">How It Works</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">Three simple steps to start saving on your hotel stays across Africa.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {HOW_IT_WORKS.map((item) => (
-              <div key={item.step} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-emerald/10 flex items-center justify-center mx-auto mb-4">
-                  <item.icon className="h-7 w-7 text-emerald" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Hotels */}
-      <section className="py-16 md:py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">Featured Hotels</h2>
-              <p className="text-muted-foreground">Top-rated hotels with the best discounts</p>
-            </div>
-            <Link href="/hotels" className="hidden sm:flex items-center text-emerald hover:underline text-sm font-medium">
-              View all <ChevronRight className="h-4 w-4 ml-1" />
-            </Link>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-48 w-full" />
-                <CardContent className="p-4"><Skeleton className="h-4 w-3/4 mb-2" /><Skeleton className="h-4 w-1/2" /></CardContent>
-              </Card>
-            )) : hotels.map(hotel => (
-              <Link key={hotel.id} href={`/hotels/${hotel.slug}`}>
-                <Card className="overflow-hidden hotel-card cursor-pointer group h-full">
-                  <div className="relative h-48 bg-muted">
-                    {hotel.coverImage ? (
-                      <img src={hotel.coverImage} alt={hotel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl">🏨</div>
-                    )}
-                    <Badge className="absolute top-3 right-3 bg-gold text-gold-foreground font-bold">
-                      {hotel.discountPercent}% OFF
-                    </Badge>
-                    {hotel.isFeatured && (
-                      <Badge className="absolute top-3 left-3 bg-emerald text-emerald-foreground">Featured</Badge>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-semibold text-lg mb-1 group-hover:text-emerald transition-colors">{hotel.name}</h3>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                      <MapPin className="h-3 w-3" /> {hotel.city}, {hotel.country}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-0.5">
-                        {Array.from({ length: hotel.starRating }).map((_, i) => (
-                          <Star key={i} className="h-3 w-3 fill-gold text-gold" />
-                        ))}
-                      </div>
-                      <Badge variant="outline" className="text-xs">{hotel.tier}</Badge>
-                    </div>
-                    {(() => {
-                      const tags = parseJsonField<string[]>(hotel.vibeTags);
-                      return tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {tags.slice(0, 3).map((tag: string) => (
-                            <span key={tag} className="text-[10px] px-2 py-0.5 bg-emerald/10 text-emerald rounded-full">{tag}</span>
-                          ))}
-                        </div>
-                      );
-                    })()}
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-          <div className="text-center mt-8 sm:hidden">
-            <Link href="/hotels"><Button variant="outline">View All Hotels</Button></Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Subscription Plans */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-3">Choose Your Plan</h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">From free explorer to unlimited premium — find the perfect plan for your travel style.</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {PLAN_FEATURES.map(plan => (
-              <Card key={plan.name} className={`relative p-6 flex flex-col ${plan.highlight ? 'ring-2 ring-emerald shadow-lg' : ''}`}>
-                {plan.highlight && <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald text-emerald-foreground">Most Popular</Badge>}
-                <h3 className="font-bold text-xl mb-1">{plan.name}</h3>
-                <p className="text-2xl font-bold text-emerald mb-4">{plan.price}</p>
-                <ul className="space-y-2 text-sm flex-1 mb-6">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald" /> {plan.coupons} coupons</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald" /> {plan.tiers} hotels</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald" /> QR code coupons</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald" /> Loyalty points</li>
-                </ul>
-                <Link href="/subscribe">
-                  <Button className={`w-full ${plan.highlight ? 'bg-emerald hover:bg-emerald/90 text-emerald-foreground' : ''}`}>
-                    Get Started
-                  </Button>
-                </Link>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      {faqs.length > 0 && (
-        <section className="py-16 md:py-24 bg-muted/30">
-          <div className="container mx-auto px-4 max-w-3xl">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-3">Frequently Asked Questions</h2>
-            </div>
-            <div className="space-y-4">
-              {faqs.map(faq => (
-                <Card key={faq.id} className="p-5">
-                  <h4 className="font-semibold mb-2">{faq.question}</h4>
-                  <p className="text-sm text-muted-foreground">{faq.answer}</p>
-                </Card>
-              ))}
-            </div>
-            <div className="text-center mt-6">
-              <Link href="/faq"><Button variant="outline">View All FAQs</Button></Link>
+          {/* View options */}
+          <div className="flex items-center justify-between mt-3">
+            <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#0E5C3B] transition-colors">
+              <Navigation className="h-3.5 w-3.5" /> Near Me
+            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
+              >
+                <List className="h-3.5 w-3.5" /> List
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-gray-900 text-white'
+                    : 'text-gray-500 hover:bg-gray-100'
+                }`}
+              >
+                <Map className="h-3.5 w-3.5" /> Map
+              </button>
             </div>
           </div>
-        </section>
-      )}
-
-      {/* CTA */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-emerald to-emerald/80 text-emerald-foreground">
-        <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Saving?</h2>
-          <p className="text-lg opacity-90 mb-8">Join thousands of travelers saving on hotels across Africa.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/register"><Button size="lg" className="bg-gold hover:bg-gold/90 text-gold-foreground font-semibold">Create Free Account</Button></Link>
-            <Link href="/subscribe"><Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">View Plans</Button></Link>
-          </div>
         </div>
       </section>
+
+      {/* Hotel Sections by City */}
+      <div className="divide-y divide-gray-100 dark:divide-gray-800">
+        {CITY_SECTIONS.map(section => {
+          const cityHotels = getHotelsForCity(section.city);
+          if (!loading && cityHotels.length === 0) return null;
+          return (
+            <HotelSection
+              key={section.city}
+              title={section.title}
+              hotels={cityHotels}
+              loading={loading}
+            />
+          );
+        })}
+
+        {/* More to explore section */}
+        {(!loading && otherHotels.length > 0) && (
+          <HotelSection
+            title="More to explore"
+            hotels={otherHotels}
+            loading={loading}
+          />
+        )}
+
+        {/* If no city-specific hotels, show all as one section */}
+        {!loading && allHotels.length > 0 && CITY_SECTIONS.every(s => getHotelsForCity(s.city).length === 0) && (
+          <HotelSection
+            title="Available Hotels"
+            hotels={applyFilters(allHotels).slice(0, 12)}
+            loading={loading}
+          />
+        )}
+      </div>
     </div>
   );
 }
