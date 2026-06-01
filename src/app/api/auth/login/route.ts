@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Compare password
-    const isValid = comparePassword(password, user.passwordHash)
+    const isValid = await comparePassword(password, user.passwordHash)
     if (!isValid) {
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },
