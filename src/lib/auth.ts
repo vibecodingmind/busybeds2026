@@ -48,3 +48,14 @@ export async function hashPassword(password: string): Promise<string> {
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
+
+export function generateReferralCode(fullName: string): string {
+  const prefix = fullName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 3);
+  const suffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `${prefix}${suffix}`;
+}

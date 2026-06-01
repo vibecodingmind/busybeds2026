@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-export default function VerifyEmailPage() {
+function VerifyEmailForm() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -47,5 +47,13 @@ export default function VerifyEmailPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[80vh] flex items-center justify-center">Loading...</div>}>
+      <VerifyEmailForm />
+    </Suspense>
   );
 }

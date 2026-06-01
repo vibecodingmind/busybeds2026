@@ -71,3 +71,67 @@ export function generateCouponEmail(
 
   return { subject, html };
 }
+
+export function generateVerifyEmail(
+  fullName: string,
+  verifyToken: string
+): { subject: string; html: string } {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const verifyUrl = `${baseUrl}/verify-email?token=${verifyToken}`;
+  const subject = 'Verify Your Email - BusyBeds';
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #0E5C3B, #0a4a2f); padding: 30px; border-radius: 12px; text-align: center; color: white;">
+        <h1 style="margin: 0; font-size: 28px;">BusyBeds</h1>
+        <p style="margin: 8px 0 0; opacity: 0.9;">Email Verification</p>
+      </div>
+      <div style="padding: 30px; background: #f9fafb; border-radius: 0 0 12px 12px;">
+        <p>Hello <strong>${fullName}</strong>,</p>
+        <p>Thank you for signing up! Please verify your email address by clicking the button below:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${verifyUrl}" style="background: #0E5C3B; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Verify Email</a>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">Or copy this link to your browser: <br/><a href="${verifyUrl}" style="color: #0E5C3B; word-break: break-all;">${verifyUrl}</a></p>
+        <p style="color: #9ca3af; font-size: 13px;">This link expires in 24 hours.</p>
+      </div>
+      <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+        <p>&copy; ${new Date().getFullYear()} BusyBeds. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  return { subject, html };
+}
+
+export function generateResetPasswordEmail(
+  fullName: string,
+  resetToken: string
+): { subject: string; html: string } {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+  const subject = 'Reset Your Password - BusyBeds';
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="background: linear-gradient(135deg, #0E5C3B, #0a4a2f); padding: 30px; border-radius: 12px; text-align: center; color: white;">
+        <h1 style="margin: 0; font-size: 28px;">BusyBeds</h1>
+        <p style="margin: 8px 0 0; opacity: 0.9;">Password Reset</p>
+      </div>
+      <div style="padding: 30px; background: #f9fafb; border-radius: 0 0 12px 12px;">
+        <p>Hello <strong>${fullName}</strong>,</p>
+        <p>We received a request to reset your password. Click the button below to set a new password:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="background: #0E5C3B; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Reset Password</a>
+        </div>
+        <p style="color: #6b7280; font-size: 14px;">Or copy this link to your browser: <br/><a href="${resetUrl}" style="color: #0E5C3B; word-break: break-all;">${resetUrl}</a></p>
+        <p style="color: #9ca3af; font-size: 13px;">This link expires in 1 hour. If you did not request this, you can safely ignore this email.</p>
+      </div>
+      <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+        <p>&copy; ${new Date().getFullYear()} BusyBeds. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+
+  return { subject, html };
+}

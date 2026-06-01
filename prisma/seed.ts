@@ -77,13 +77,27 @@ async function seed() {
   await db.hotelOwner.create({ data: { userId: owner.id, hotelId: hotels[0].id, kycStatus: 'approved' } });
   console.log(`✅ Created ${hotels.length} hotels with rooms`);
 
+  // Create subscriptions for travelers
+  const packages = await db.subscriptionPackage.findMany();
+  const subscriptions = [];
+  for (let i = 0; i < travelers.length; i++) {
+    const pkg = packages[i % packages.length];
+    const sub = await db.subscription.create({ data: {
+      userId: travelers[i].id, packageId: pkg.id,
+      status: 'active', billingCycle: 'monthly',
+      startsAt: new Date(), expiresAt: new Date(Date.now() + 30*86400000),
+    }});
+    subscriptions.push(sub);
+  }
+  console.log(`✅ Created ${subscriptions.length} subscriptions`);
+
   // Coupons
   for (let i = 0; i < 80; i++) {
     const statuses = ['active','redeemed','expired'];
     const status = statuses[i % 3];
     const code = 'BB-' + Math.random().toString(36).substring(2,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
     await db.coupon.create({ data: {
-      code, userId: travelers[i % travelers.length].id, hotelId: hotels[i % hotels.length].id, subscriptionId: 'seed',
+      code, userId: travelers[i % travelers.length].id, hotelId: hotels[i % hotels.length].id, subscriptionId: subscriptions[i % subscriptions.length].id,
       discountPercent: hotels[i % hotels.length].discountPercent, status,
       generatedAt: new Date(Date.now() - Math.random() * 30*86400000),
       expiresAt: new Date(Date.now() + Math.random() * 30*86400000),

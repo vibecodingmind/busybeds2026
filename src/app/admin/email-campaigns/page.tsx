@@ -1,10 +1,10 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function Adminemail campaignsPage() {
+export default function AdminEmailCampaignsPage() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6 capitalize">email campaigns</h1>
+      <h1 className="text-3xl font-bold mb-6 capitalize">Email Campaigns</h1>
       <Card className="p-8 text-center">
         <p className="text-muted-foreground">Manage email campaigns from this panel. Data is fetched from the API.</p>
       </Card>
