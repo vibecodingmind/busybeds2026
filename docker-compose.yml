@@ -53,8 +53,10 @@ services:
     container_name: busybeds-db
     image: postgres:16-alpine
     restart: unless-stopped
-    ports:
-      - "5432:5432"
+    # No external port needed - app connects via Docker network
+    # Only expose if you need external access (e.g., pgAdmin from outside)
+    # ports:
+    #   - "5432:5432"
     environment:
       POSTGRES_DB: busybeds_prod
       POSTGRES_USER: busybeds
