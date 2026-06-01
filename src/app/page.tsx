@@ -399,8 +399,8 @@ export default function HomePage() {
           <HotelSection title="Available Hotels" hotels={applyFilters(allHotels).slice(0, 12)} loading={loading} />
         )}
 
-        {/* Bottom spacing for mobile tab bar */}
-        <div className="h-4 lg:h-0" />
+        {/* Bottom spacing for tab bar */}
+        <div className="h-4" />
       </div>
     </div>
   );

@@ -4,9 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/context/NotificationContext';
-import { Badge } from '@/components/ui/badge';
 import {
-  Home, Search, Ticket, MessageSquare, User, Heart, Bell
+  Home, Search, Ticket, User, Heart
 } from 'lucide-react';
 
 const TABS = [
@@ -17,6 +16,10 @@ const TABS = [
   { href: '/profile', label: 'Profile', icon: User, matchExact: false },
 ];
 
+/**
+ * BottomTabBar — App-style bottom navigation, visible on ALL screen sizes.
+ * Replaces both the mobile-only tab bar and the desktop navbar's navigation links.
+ */
 export function BottomTabBar() {
   const pathname = usePathname();
   const { user } = useAuth();
@@ -28,7 +31,7 @@ export function BottomTabBar() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 dark:bg-[#1a1d27]/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-gray-700/80 safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#1a1d27]/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-gray-700/60 safe-area-bottom">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {TABS.map(tab => {
           const active = isActive(tab);

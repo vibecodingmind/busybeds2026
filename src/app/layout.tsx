@@ -6,10 +6,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { ThemeProvider } from "next-themes";
-import { Navbar } from "@/components/Navbar";
-import { MobileHeader } from "@/components/MobileHeader";
+import { AppHeader } from "@/components/AppHeader";
 import { BottomTabBar } from "@/components/BottomTabBar";
-import { Footer } from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,21 +59,13 @@ export default function RootLayout({
           <AuthProvider>
             <CurrencyProvider>
               <NotificationProvider>
-                {/* Desktop Navbar (hidden on mobile) */}
-                <Navbar />
+                {/* Unified App Header — works on ALL screen sizes */}
+                <AppHeader />
 
-                {/* Mobile Header (hidden on desktop) */}
-                <MobileHeader />
+                {/* Main content with bottom padding for tab bar on all screens */}
+                <main className="flex-1 pb-20">{children}</main>
 
-                {/* Main content with bottom padding for tab bar */}
-                <main className="flex-1 pb-16 lg:pb-0">{children}</main>
-
-                {/* Footer (desktop only, hidden on mobile) */}
-                <div className="hidden lg:block">
-                  <Footer />
-                </div>
-
-                {/* Bottom Tab Bar (mobile only) */}
+                {/* Bottom Tab Bar — visible on ALL screen sizes (app-style) */}
                 <BottomTabBar />
 
                 <Toaster richColors position="top-center" />
