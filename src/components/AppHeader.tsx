@@ -1,12 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Sun, Moon, User, Heart, MessageSquare, Settings, LogOut, Shield, Building2 } from 'lucide-react';
+import { Bell, Sun, Moon, User, Heart, MessageSquare, Settings, LogOut, Shield, Building2, Search } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -14,26 +16,45 @@ import {
 
 /**
  * AppHeader — Unified compact header for ALL screen sizes.
- * App-style: logo left, action icons right. No nav links (those live in BottomTabBar).
+ * Search bar integrated in the same row as logo + icons.
  */
 export function AppHeader() {
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
   const { theme, setTheme } = useTheme();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      window.location.href = `/hotels?search=${encodeURIComponent(searchQuery)}`;
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-[#1a1d27]/95 backdrop-blur-xl border-b border-gray-200/80 dark:border-gray-700/60 safe-area-top">
-      <div className="flex h-14 items-center justify-between px-4 max-w-[1440px] mx-auto w-full">
+      <div className="flex h-14 items-center gap-3 px-4 max-w-[1440px] mx-auto w-full">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
+        <Link href="/" className="flex items-center gap-1.5 shrink-0">
           <span className="text-[#0E5C3B] dark:text-[#10b981] text-xl">🛏️</span>
-          <span className="text-[#1a1a2e] dark:text-white font-extrabold text-lg tracking-tight">
+          <span className="text-[#1a1a2e] dark:text-white font-extrabold text-lg tracking-tight hidden sm:inline">
             Busy<span className="text-[#0E5C3B] dark:text-[#10b981]">Beds</span>
           </span>
         </Link>
 
+        {/* Search Bar — in the same row */}
+        <div className="relative flex-1 max-w-xl">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search hotels, cities..."
+            className="pl-9 h-9 bg-gray-100 dark:bg-gray-800 border-0 rounded-full text-sm focus:ring-2 focus:ring-[#0E5C3B]"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
+          />
+        </div>
+
         {/* Right actions — compact, app-style */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {user && (
             <Link href="/notifications">
               <Button variant="ghost" size="icon" className="relative h-9 w-9 text-gray-500 hover:text-[#0E5C3B] dark:hover:text-[#10b981]">

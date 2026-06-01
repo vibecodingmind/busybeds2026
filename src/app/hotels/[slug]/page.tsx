@@ -1,15 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MapPin, Star, Wifi, Car, Dumbbell, UtensilsCrossed, Waves, Phone, Globe, Heart, Share2, Clock, Ticket, Users, BedDouble, ArrowLeft } from 'lucide-react';
+import { MapPin, Star, Wifi, Car, Dumbbell, UtensilsCrossed, Waves, Phone, Globe, Heart, Share2, Clock, Ticket, Users, BedDouble, ArrowLeft, ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCurrency } from '@/context/CurrencyContext';
 import { parseJsonField } from '@/lib/parse';
@@ -22,6 +20,7 @@ const AMENITY_ICONS: Record<string, any> = {
 
 export default function HotelDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const slug = params.slug as string;
   const { user } = useAuth();
   const { formatPrice } = useCurrency();
@@ -29,6 +28,7 @@ export default function HotelDetailPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [couponResult, setCouponResult] = useState<any>(null);
+  const [activeImg, setActiveImg] = useState(0);
 
   useEffect(() => {
     async function fetchHotel() {
@@ -44,7 +44,7 @@ export default function HotelDetailPage() {
   }, [slug]);
 
   const handleGenerateCoupon = async () => {
-    if (!user) { window.location.href = '/login'; return; }
+    if (!user) { router.push('/login'); return; }
     setGenerating(true);
     try {
       const res = await fetch('/api/coupons', {
@@ -63,18 +63,25 @@ export default function HotelDetailPage() {
   };
 
   if (loading) return (
-    <div className="container mx-auto px-4 py-8">
-      <Skeleton className="h-8 w-1/3 mb-4" />
-      <Skeleton className="h-64 w-full mb-6" />
-      <Skeleton className="h-6 w-1/2 mb-2" />
-      <Skeleton className="h-4 w-1/3" />
+    <div className="px-4 py-6">
+      <Skeleton className="h-4 w-24 mb-4" />
+      <Skeleton className="h-56 w-full mb-4 rounded-2xl" />
+      <Skeleton className="h-6 w-3/4 mb-2" />
+      <Skeleton className="h-4 w-1/2 mb-4" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-2/3" />
     </div>
   );
 
   if (!hotel) return (
-    <div className="container mx-auto px-4 py-16 text-center">
-      <h2 className="text-2xl font-bold mb-4">Hotel Not Found</h2>
-      <Link href="/hotels"><Button>Back to Hotels</Button></Link>
+    <div className="px-4 py-16 text-center">
+      <div className="text-5xl mb-4">🏨</div>
+      <h2 className="text-xl font-bold mb-2">Hotel Not Found</h2>
+      <p className="text-sm text-gray-500 mb-4">This hotel may no longer be available.</p>
+      <Link href="/hotels">
+        <Button className="bg-[#0E5C3B] hover:bg-[#0a4d31] text-white rounded-full">Browse Hotels</Button>
+      </Link>
     </div>
   );
 
@@ -83,237 +90,296 @@ export default function HotelDetailPage() {
     return imgs.length > 0 ? imgs : [hotel.coverImage].filter(Boolean);
   })();
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <Link href="/hotels" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
-        <ArrowLeft className="h-4 w-4 mr-1" /> Back to Hotels
-      </Link>
+  const amenities = parseJsonField<string[]>(hotel.amenities);
+  const vibeTags = parseJsonField<string[]>(hotel.vibeTags);
 
-      {/* Image Gallery */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-8 rounded-xl overflow-hidden">
-        <div className="md:col-span-2 md:row-span-2 h-64 md:h-[400px] bg-muted">
-          {images[0] ? <img src={images[0]} alt={hotel.name} className="w-full h-full object-cover" /> : (
-            <div className="w-full h-full flex items-center justify-center text-6xl">🏨</div>
-          )}
+  return (
+    <div className="page-enter pb-24">
+      {/* Top bar - back + actions */}
+      <div className="sticky top-14 z-40 bg-white/95 dark:bg-[#0F1117]/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 px-4 py-2 flex items-center justify-between">
+        <button onClick={() => router.back()} className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400 active:scale-95 transition-all">
+          <ChevronLeft className="h-5 w-5" />
+          <span>Back</span>
+        </button>
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-500">
+            <Share2 className="h-[18px] w-[18px]" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-500">
+            <Heart className="h-[18px] w-[18px]" />
+          </Button>
         </div>
-        {images.slice(1, 5).map((img, i) => (
-          <div key={i} className="h-32 md:h-[196px] bg-muted">
-            {img ? <img src={img} alt={`${hotel.name} ${i+2}`} className="w-full h-full object-cover" /> : (
-              <div className="w-full h-full flex items-center justify-center text-3xl">🏨</div>
-            )}
-          </div>
-        ))}
-        {images.length < 5 && Array.from({ length: Math.max(0, 4 - images.length) }).map((_, i) => (
-          <div key={`placeholder-${i}`} className="h-32 md:h-[196px] bg-muted flex items-center justify-center text-3xl">🏨</div>
-        ))}
       </div>
 
-      {/* Main Content */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          {/* Header */}
-          <div className="mb-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">{hotel.name}</h1>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" /> {hotel.city}, {hotel.country}
-                  </div>
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: hotel.starRating }).map((_, i) => <Star key={i} className="h-4 w-4 fill-gold text-gold" />)}
-                  </div>
-                  <Badge className="capitalize">{hotel.tier}</Badge>
-                  <Badge variant="outline">{hotel.category}</Badge>
+      {/* Image Gallery - Full width, swipeable */}
+      <div className="relative">
+        <div className="aspect-[16/10] bg-gray-100 dark:bg-gray-800 overflow-hidden">
+          {images.length > 0 ? (
+            <img src={images[activeImg]} alt={hotel.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-6xl bg-gradient-to-br from-[#0E5C3B]/10 to-[#C8932A]/10">🏨</div>
+          )}
+        </div>
+
+        {/* Image navigation dots */}
+        {images.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+            {images.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveImg(idx)}
+                className={`w-2 h-2 rounded-full transition-all ${idx === activeImg ? 'bg-white w-4' : 'bg-white/50'}`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Discount badge */}
+        {hotel.discountPercent > 0 && (
+          <Badge className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-lg">
+            {hotel.discountPercent}% OFF
+          </Badge>
+        )}
+
+        {/* Swipe arrows for images */}
+        {images.length > 1 && (
+          <>
+            {activeImg > 0 && (
+              <button
+                onClick={() => setActiveImg(activeImg - 1)}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm shadow flex items-center justify-center active:scale-90 transition-all"
+              >
+                <ChevronLeft className="h-5 w-5 text-gray-700" />
+              </button>
+            )}
+            {activeImg < images.length - 1 && (
+              <button
+                onClick={() => setActiveImg(activeImg + 1)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm shadow flex items-center justify-center active:scale-90 transition-all"
+              >
+                <ChevronLeft className="h-5 w-5 text-gray-700 rotate-180" />
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Hotel Info */}
+      <div className="px-4 pt-4">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{hotel.name}</h1>
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
+            <MapPin className="h-3.5 w-3.5 shrink-0" /> {hotel.city}, {hotel.country}
+          </div>
+          <div className="flex items-center gap-0.5">
+            {Array.from({ length: hotel.starRating }).map((_, i) => (
+              <Star key={i} className="h-3.5 w-3.5 fill-[#C8932A] text-[#C8932A]" />
+            ))}
+          </div>
+          <Badge className="text-[10px] px-1.5 py-0 bg-[#0E5C3B] dark:bg-[#10b981] text-white capitalize">{hotel.tier}</Badge>
+          {hotel.category && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400">{hotel.category}</Badge>
+          )}
+        </div>
+
+        {/* Quick discount info */}
+        {hotel.discountPercent > 0 && (
+          <div className="mt-3 flex items-center gap-2 p-3 bg-[#0E5C3B]/5 dark:bg-[#10b981]/10 rounded-xl">
+            <Ticket className="h-5 w-5 text-[#0E5C3B] dark:text-[#10b981] shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-[#0E5C3B] dark:text-[#10b981]">{hotel.discountPercent}% member discount</p>
+              <p className="text-xs text-gray-500">Subscribe to unlock exclusive coupons</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div className="px-4 mt-4">
+        <Tabs defaultValue="overview">
+          <TabsList className="w-full">
+            <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
+            <TabsTrigger value="rooms" className="flex-1">Rooms</TabsTrigger>
+            <TabsTrigger value="reviews" className="flex-1">Reviews</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+              {hotel.descriptionLong || hotel.descriptionShort}
+            </p>
+
+            {/* Amenities */}
+            {amenities.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold text-sm mb-2">Amenities</h3>
+                <div className="flex flex-wrap gap-2">
+                  {amenities.map((amenity: string) => {
+                    const Icon = AMENITY_ICONS[amenity] || Wifi;
+                    return (
+                      <div key={amenity} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs">
+                        <Icon className="h-3.5 w-3.5 text-[#0E5C3B] dark:text-[#10b981]" /> {amenity}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon"><Heart className="h-4 w-4" /></Button>
-                <Button variant="outline" size="icon"><Share2 className="h-4 w-4" /></Button>
+            )}
+
+            {/* Vibe Tags */}
+            {vibeTags.length > 0 && (
+              <div className="mb-4">
+                <h3 className="font-semibold text-sm mb-2">Vibe</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {vibeTags.map((tag: string) => (
+                    <Badge key={tag} variant="secondary" className="px-2.5 py-1 text-xs">{tag}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {hotel.websiteUrl && (
+              <a href={hotel.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-[#0E5C3B] dark:text-[#10b981] hover:underline text-sm flex items-center gap-1">
+                <Globe className="h-4 w-4" /> Visit hotel website
+              </a>
+            )}
+          </TabsContent>
+
+          <TabsContent value="rooms" className="mt-4">
+            <h3 className="font-semibold text-sm mb-3">Room Types</h3>
+            {hotel.roomTypes && hotel.roomTypes.length > 0 ? (
+              <div className="space-y-3">
+                {hotel.roomTypes.map(room => (
+                  <div key={room.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                    <div className="flex justify-between items-start gap-2">
+                      <div>
+                        <h4 className="font-semibold text-sm">{room.name}</h4>
+                        <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          <span className="flex items-center gap-1"><BedDouble className="h-3 w-3" /> {room.bedType}</span>
+                          {room.sizeSqm && <span>{room.sizeSqm} sqm</span>}
+                          <span className="flex items-center gap-1"><Users className="h-3 w-3" /> Max {room.maxGuests}</span>
+                        </div>
+                        {room.description && <p className="text-xs text-gray-500 mt-1.5">{room.description}</p>}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-lg font-bold text-[#0E5C3B] dark:text-[#10b981]">{formatPrice(room.pricePerNight)}</p>
+                        <p className="text-[10px] text-gray-500">per night</p>
+                        {hotel.discountPercent > 0 && (
+                          <p className="text-xs font-medium text-[#C8932A] mt-0.5">Save {formatPrice(room.pricePerNight * hotel.discountPercent / 100)}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No room information available yet.</p>
+            )}
+          </TabsContent>
+
+          <TabsContent value="reviews" className="mt-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="text-center">
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{hotel.avgRating?.toFixed(1) || 'N/A'}</p>
+                <p className="text-xs text-gray-500">{hotel.reviewCount || 0} reviews</p>
+              </div>
+              <div className="flex-1">
+                {[5,4,3,2,1].map(star => (
+                  <div key={star} className="flex items-center gap-1.5 text-xs">
+                    <span className="w-2">{star}</span>
+                    <div className="flex-1 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className="h-full bg-[#C8932A] rounded-full" style={{ width: `${Math.random() * 80 + 10}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {hotel.reviews && hotel.reviews.length > 0 ? (
+              <div className="space-y-3">
+                {hotel.reviews.slice(0, 5).map(review => (
+                  <div key={review.id} className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: review.rating }).map((_, i) => <Star key={i} className="h-3 w-3 fill-[#C8932A] text-[#C8932A]" />)}
+                      </div>
+                      <span className="font-semibold text-xs">{review.title}</span>
+                      {review.isVerified && <Badge variant="secondary" className="text-[9px] px-1 py-0">Verified</Badge>}
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{review.body}</p>
+                    {review.ownerReply && (
+                      <div className="mt-2 ml-3 pl-2.5 border-l-2 border-[#0E5C3B] dark:border-[#10b981]">
+                        <p className="text-[10px] font-medium text-[#0E5C3B] dark:text-[#10b981] mb-0.5">Hotel Response</p>
+                        <p className="text-xs text-gray-500">{review.ownerReply}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No reviews yet. Be the first to review after your stay!</p>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Sticky Bottom CTA - App style */}
+      <div className="fixed bottom-16 left-0 right-0 z-40 bg-white/95 dark:bg-[#1a1d27]/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-gray-700/60 px-4 py-3 safe-area-bottom">
+        <div className="flex items-center gap-3 max-w-lg mx-auto">
+          <div className="flex-1">
+            {hotel.roomTypes && hotel.roomTypes.length > 0 ? (
+              <>
+                <p className="text-xs text-gray-500">Rooms from</p>
+                <p className="text-xl font-bold text-[#0E5C3B] dark:text-[#10b981]">
+                  {formatPrice(Math.min(...hotel.roomTypes.map(r => r.pricePerNight)))}
+                  <span className="text-xs font-normal text-gray-500">/night</span>
+                </p>
+              </>
+            ) : (
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Get Discount Coupon</p>
+            )}
+          </div>
+          <Button
+            className="bg-[#0E5C3B] hover:bg-[#0a4d31] dark:bg-[#10b981] dark:hover:bg-[#059669] text-white rounded-xl h-12 px-6 text-sm font-semibold active:scale-95 transition-all"
+            onClick={handleGenerateCoupon}
+            disabled={generating}
+          >
+            {generating ? 'Generating...' : <><Ticket className="mr-1.5 h-4 w-4" /> Get Coupon</>}
+          </Button>
+        </div>
+        {!user && <p className="text-[10px] text-gray-400 text-center mt-1">Login required to generate coupons</p>}
+      </div>
+
+      {/* Coupon Result Modal */}
+      {couponResult && (
+        <div className="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4" onClick={() => setCouponResult(null)}>
+          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-12 h-12 rounded-full bg-[#0E5C3B]/10 dark:bg-[#10b981]/10 flex items-center justify-center mx-auto mb-3">
+                <Ticket className="h-6 w-6 text-[#0E5C3B] dark:text-[#10b981]" />
+              </div>
+              <p className="text-sm text-gray-500 mb-1">Your Coupon Code</p>
+              <p className="text-2xl font-mono font-bold text-[#0E5C3B] dark:text-[#10b981] mb-3">{couponResult.code}</p>
+              {couponResult.qrDataUrl && <img src={couponResult.qrDataUrl} alt="QR Code" className="mx-auto w-28 h-28 mb-3" />}
+              <Badge className="bg-[#C8932A] text-white mb-2">{couponResult.discountPercent}% OFF</Badge>
+              <p className="text-xs text-gray-400 mt-1">Expires: {new Date(couponResult.expiresAt).toLocaleDateString()}</p>
+              <div className="flex gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                  onClick={() => navigator.clipboard?.writeText(couponResult.code)}
+                >
+                  Copy Code
+                </Button>
+                <Button
+                  className="flex-1 bg-[#0E5C3B] hover:bg-[#0a4d31] dark:bg-[#10b981] dark:hover:bg-[#059669] text-white rounded-xl"
+                  onClick={() => setCouponResult(null)}
+                >
+                  Done
+                </Button>
               </div>
             </div>
           </div>
-
-          <Tabs defaultValue="overview">
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="rooms">Rooms</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="mt-6">
-              <p className="text-muted-foreground mb-6 leading-relaxed">{hotel.descriptionLong || hotel.descriptionShort}</p>
-
-              {/* Amenities */}
-              {(() => {
-                const amenities = parseJsonField<string[]>(hotel.amenities);
-                return amenities.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-lg mb-3">Amenities</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {amenities.map((amenity: string) => {
-                        const Icon = AMENITY_ICONS[amenity] || Wifi;
-                        return (
-                          <div key={amenity} className="flex items-center gap-2 text-sm">
-                            <Icon className="h-4 w-4 text-emerald" /> {amenity}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Vibe Tags */}
-              {(() => {
-                const tags = parseJsonField<string[]>(hotel.vibeTags);
-                return tags.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-lg mb-3">Vibe</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {tags.map((tag: string) => (
-                        <Badge key={tag} variant="secondary" className="px-3 py-1">{tag}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {hotel.websiteUrl && (
-                <a href={hotel.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-emerald hover:underline text-sm flex items-center gap-1">
-                  <Globe className="h-4 w-4" /> Visit hotel website
-                </a>
-              )}
-            </TabsContent>
-
-            <TabsContent value="rooms" className="mt-6">
-              <h3 className="font-semibold text-lg mb-4">Room Types</h3>
-              {hotel.roomTypes && hotel.roomTypes.length > 0 ? (
-                <div className="space-y-4">
-                  {hotel.roomTypes.map(room => (
-                    <Card key={room.id} className="p-4">
-                      <div className="flex flex-col sm:flex-row justify-between gap-3">
-                        <div>
-                          <h4 className="font-semibold">{room.name}</h4>
-                          <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                            <span className="flex items-center gap-1"><BedDouble className="h-3 w-3" /> {room.bedType}</span>
-                            {room.sizeSqm && <span>{room.sizeSqm} sqm</span>}
-                            <span className="flex items-center gap-1"><Users className="h-3 w-3" /> Max {room.maxGuests}</span>
-                          </div>
-                          {room.description && <p className="text-sm text-muted-foreground mt-2">{room.description}</p>}
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xl font-bold text-emerald">{formatPrice(room.pricePerNight)}</p>
-                          <p className="text-xs text-muted-foreground">per night</p>
-                          <p className="text-sm font-medium text-gold mt-1">Save {formatPrice(room.pricePerNight * hotel.discountPercent / 100)}</p>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No room information available yet.</p>
-              )}
-            </TabsContent>
-
-            <TabsContent value="reviews" className="mt-6">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="text-center">
-                  <p className="text-4xl font-bold">{hotel.avgRating?.toFixed(1) || 'N/A'}</p>
-                  <p className="text-sm text-muted-foreground">{hotel.reviewCount || 0} reviews</p>
-                </div>
-                <div className="flex-1">
-                  {[5,4,3,2,1].map(star => (
-                    <div key={star} className="flex items-center gap-2 text-sm">
-                      <span>{star}</span>
-                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-gold rounded-full" style={{ width: `${Math.random() * 80 + 10}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <Separator className="mb-6" />
-              {hotel.reviews && hotel.reviews.length > 0 ? (
-                <div className="space-y-4">
-                  {hotel.reviews.map(review => (
-                    <Card key={review.id} className="p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: review.rating }).map((_, i) => <Star key={i} className="h-3 w-3 fill-gold text-gold" />)}
-                        </div>
-                        <span className="font-semibold text-sm">{review.title}</span>
-                        {review.isVerified && <Badge variant="secondary" className="text-[10px]">Verified</Badge>}
-                      </div>
-                      <p className="text-sm text-muted-foreground">{review.body}</p>
-                      {review.ownerReply && (
-                        <div className="mt-3 ml-4 pl-3 border-l-2 border-emerald">
-                          <p className="text-xs font-medium text-emerald mb-1">Hotel Response</p>
-                          <p className="text-sm text-muted-foreground">{review.ownerReply}</p>
-                        </div>
-                      )}
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-muted-foreground">No reviews yet. Be the first to review after your stay!</p>
-              )}
-            </TabsContent>
-          </Tabs>
         </div>
-
-        {/* Sidebar - CTA */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-20 space-y-4">
-            <Card className="p-6">
-              <div className="text-center mb-4">
-                <Badge className="bg-gold text-gold-foreground text-lg px-4 py-1 mb-2">{hotel.discountPercent}% OFF</Badge>
-                <p className="text-sm text-muted-foreground">Member Exclusive Discount</p>
-              </div>
-              {hotel.roomTypes && hotel.roomTypes.length > 0 && (
-                <div className="text-center mb-4">
-                  <p className="text-sm text-muted-foreground">Rooms from</p>
-                  <p className="text-2xl font-bold text-emerald">{formatPrice(Math.min(...hotel.roomTypes.map(r => r.pricePerNight)))}</p>
-                  <p className="text-sm text-gold">You save {formatPrice(Math.min(...hotel.roomTypes.map(r => r.pricePerNight)) * hotel.discountPercent / 100)}/night</p>
-                </div>
-              )}
-              <Button
-                className="w-full bg-emerald hover:bg-emerald/90 text-emerald-foreground h-12 text-lg font-semibold"
-                onClick={handleGenerateCoupon}
-                disabled={generating}
-              >
-                {generating ? 'Generating...' : <><Ticket className="mr-2 h-5 w-5" /> Get Discount Coupon</>}
-              </Button>
-              {!user && <p className="text-xs text-muted-foreground text-center mt-2">Login required to generate coupons</p>}
-            </Card>
-
-            {/* Coupon Result */}
-            {couponResult && (
-              <Card className="p-6 coupon-dashed">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-1">Your Coupon Code</p>
-                  <p className="text-2xl font-mono font-bold text-emerald mb-3">{couponResult.code}</p>
-                  {couponResult.qrDataUrl && <img src={couponResult.qrDataUrl} alt="QR Code" className="mx-auto w-32 h-32 mb-3" />}
-                  <Badge className="bg-gold text-gold-foreground">{couponResult.discountPercent}% OFF</Badge>
-                  <p className="text-xs text-muted-foreground mt-2">Expires: {new Date(couponResult.expiresAt).toLocaleDateString()}</p>
-                  <Button variant="outline" className="w-full mt-3" onClick={() => navigator.clipboard?.writeText(couponResult.code)}>
-                    Copy Code
-                  </Button>
-                </div>
-              </Card>
-            )}
-
-            <Card className="p-4">
-              <h4 className="font-semibold text-sm mb-2">How to Use</h4>
-              <ol className="text-xs text-muted-foreground space-y-1">
-                <li>1. Generate your discount coupon above</li>
-                <li>2. Show the QR code or coupon code at check-in</li>
-                <li>3. Enjoy your exclusive member discount!</li>
-              </ol>
-            </Card>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

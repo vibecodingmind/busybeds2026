@@ -2,37 +2,39 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  Search, MapPin, Star, Heart, ShoppingCart, ChevronLeft, ChevronRight,
-  SlidersHorizontal, Map, List, Navigation, Hotel, Castle, Palmtree,
+  MapPin, Star, Heart, ShoppingCart, ChevronLeft, ChevronRight,
+  Map, List, Navigation, Hotel, Castle, Palmtree,
   Home, Building2, Waves, TreePalm, Tent, Mountain, Landmark
 } from 'lucide-react';
 import type { Hotel as HotelType } from '@/types';
 import { parseJsonField } from '@/lib/parse';
 
-const CATEGORIES = [
+// Tiers - separated from property types
+const TIERS = [
   { id: 'all', label: 'All' },
   { id: 'standard', label: 'Standard' },
   { id: 'premium', label: 'Premium' },
   { id: 'luxury', label: 'Luxury' },
 ];
 
+// Property types (categories) - can exist in any tier
 const PROPERTY_TYPES = [
   { id: 'hotels', label: 'Hotels', icon: Hotel },
   { id: 'resort', label: 'Resort', icon: Palmtree },
   { id: 'apartments', label: 'Apartments', icon: Building2 },
   { id: 'villa', label: 'Villa', icon: Castle },
-  { id: 'apartment', label: 'Apartment', icon: Home },
   { id: 'beachfront', label: 'Beachfront', icon: Waves },
   { id: 'safari', label: 'Safari', icon: TreePalm },
   { id: 'camping', label: 'Camping', icon: Tent },
   { id: 'mountain', label: 'Mountain', icon: Mountain },
   { id: 'historic', label: 'Historic', icon: Landmark },
+  { id: 'apartment', label: 'Apartment', icon: Home },
 ];
+
+const VISIBLE_CATEGORIES = 6; // Show 6 categories, rest via scroll
 
 const CITY_SECTIONS = [
   { title: 'Where to stay in Arusha', city: 'Arusha' },
@@ -125,19 +127,13 @@ function HotelCard({ hotel }: { hotel: HotelType }) {
             </button>
           )}
 
-          {/* Heart & Cart Icons */}
+          {/* Heart Icon */}
           <div className="absolute top-2.5 right-2.5 flex gap-1">
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsFavorited(!isFavorited); }}
               className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-all shadow-sm"
             >
               <Heart className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-            </button>
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center active:scale-90 transition-all shadow-sm"
-            >
-              <ShoppingCart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-600" />
             </button>
           </div>
         </div>
@@ -163,14 +159,6 @@ function HotelCard({ hotel }: { hotel: HotelType }) {
             {hotel.tier}
           </Badge>
         </div>
-        <Link href={`/hotels/${hotel.slug}`}>
-          <Button
-            variant="outline"
-            className="mt-2 w-full text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-[#0E5C3B] hover:text-white hover:border-[#0E5C3B] rounded-lg active:scale-[0.98] transition-all"
-          >
-            👍 Request coupons
-          </Button>
-        </Link>
       </div>
     </div>
   );
@@ -183,7 +171,6 @@ function CardSkeleton() {
       <div className="mt-2 space-y-1.5 px-0.5">
         <Skeleton className="h-3.5 w-3/4" />
         <Skeleton className="h-3 w-1/2" />
-        <Skeleton className="h-7 w-full rounded-lg" />
       </div>
     </div>
   );
@@ -241,10 +228,10 @@ function HotelSection({ title, hotels, loading }: { title: string; hotels: Hotel
 export default function HomePage() {
   const [allHotels, setAllHotels] = useState<HotelType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeTier, setActiveTier] = useState('all');
   const [activePropertyType, setActivePropertyType] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [activeViewMode, setActiveViewMode] = useState<'list' | 'map'>('list');
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchHotels() {
@@ -259,22 +246,17 @@ export default function HomePage() {
     fetchHotels();
   }, []);
 
-  const filterByCategory = (hotels: HotelType[]) => {
-    if (activeCategory === 'all') return hotels;
-    return hotels.filter(h => h.tier?.toLowerCase() === activeCategory);
+  const filterByTier = (hotels: HotelType[]) => {
+    if (activeTier === 'all') return hotels;
+    return hotels.filter(h => h.tier?.toLowerCase() === activeTier);
   };
 
-  const filterBySearch = (hotels: HotelType[]) => {
-    if (!searchQuery.trim()) return hotels;
-    const q = searchQuery.toLowerCase();
-    return hotels.filter(h =>
-      h.name.toLowerCase().includes(q) ||
-      h.city.toLowerCase().includes(q) ||
-      h.country.toLowerCase().includes(q)
-    );
+  const filterByPropertyType = (hotels: HotelType[]) => {
+    if (!activePropertyType) return hotels;
+    return hotels.filter(h => h.category?.toLowerCase() === activePropertyType);
   };
 
-  const applyFilters = (hotels: HotelType[]) => filterBySearch(filterByCategory(hotels));
+  const applyFilters = (hotels: HotelType[]) => filterByPropertyType(filterByTier(hotels));
 
   const getHotelsForCity = (city: string) => {
     return applyFilters(allHotels.filter(h =>
@@ -287,89 +269,119 @@ export default function HomePage() {
     !sectionCities.some(c => h.city?.toLowerCase().includes(c))
   )).slice(0, 8);
 
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      window.location.href = `/hotels?search=${encodeURIComponent(searchQuery)}`;
-    }
+  const scrollCategories = (direction: 'left' | 'right') => {
+    if (!categoryScrollRef.current) return;
+    categoryScrollRef.current.scrollBy({
+      left: direction === 'left' ? -200 : 200,
+      behavior: 'smooth',
+    });
   };
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0F1117] page-enter">
-      {/* Search & Filters - App Style */}
+      {/* Filter Section - App Style */}
       <section className="bg-white dark:bg-[#1a1d27] border-b border-gray-100 dark:border-gray-800">
-        <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-8 py-3">
-          {/* Search Bar - Pill shaped, app-like */}
-          <div className="flex items-center gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                placeholder="Search hotels, cities..."
-                className="pl-9 h-10 sm:h-11 bg-gray-100 dark:bg-gray-800 border-0 rounded-xl text-sm focus:ring-2 focus:ring-[#0E5C3B]"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
-              />
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-500 active:scale-95 transition-all"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-            </Button>
-            <Button
-              onClick={handleSearch}
-              className="h-10 sm:h-11 px-4 sm:px-6 rounded-xl bg-[#0E5C3B] hover:bg-[#0a4d31] active:scale-95 text-white text-sm font-semibold transition-all"
-            >
-              <Search className="h-4 w-4 sm:mr-1.5" />
-              <span className="hidden sm:inline">Search</span>
-            </Button>
-          </div>
+        <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-8 py-2.5">
 
-          {/* Category Chips - scrollable horizontal */}
-          <div className="flex items-center gap-1.5 sm:gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
-            {CATEGORIES.map(cat => (
+          {/* Row 1: Tier chips */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ scrollbarWidth: 'none' }}>
+            {TIERS.map(tier => (
               <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
+                key={tier.id}
+                onClick={() => setActiveTier(tier.id)}
                 className={`px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all active:scale-95 ${
-                  activeCategory === cat.id
+                  activeTier === tier.id
                     ? 'bg-[#0E5C3B] text-white shadow-sm'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:bg-gray-200'
                 }`}
               >
-                {cat.label}
-              </button>
-            ))}
-            <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-0.5" />
-            {PROPERTY_TYPES.map(pt => (
-              <button
-                key={pt.id}
-                onClick={() => setActivePropertyType(activePropertyType === pt.id ? null : pt.id)}
-                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm whitespace-nowrap transition-all active:scale-95 ${
-                  activePropertyType === pt.id
-                    ? 'bg-[#0E5C3B] text-white shadow-sm'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:bg-gray-200'
-                }`}
-              >
-                <pt.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                {pt.label}
+                {tier.label}
               </button>
             ))}
           </div>
 
-          {/* Near Me & View toggle */}
-          <div className="flex items-center justify-between mt-2.5">
-            <button className="flex items-center gap-1 text-xs text-gray-500 active:text-[#0E5C3B] transition-colors press-effect">
-              <Navigation className="h-3 w-3" /> Near Me
+          {/* Row 2: Categories (limited 6 visible) + scroll arrows + MAP/NEAR ME/LIST */}
+          <div className="flex items-center gap-2 mt-1.5">
+            {/* Left scroll arrow */}
+            <button
+              onClick={() => scrollCategories('left')}
+              className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-90 transition-all"
+            >
+              <ChevronLeft className="h-3.5 w-3.5 text-gray-500" />
             </button>
-            <div className="flex items-center gap-1">
-              <button className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 active:scale-95 transition-all">
+
+            {/* Scrollable categories - show 6 visible, rest by scrolling */}
+            <div
+              ref={categoryScrollRef}
+              className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scroll-smooth scrollbar-hide flex-1"
+              style={{ scrollbarWidth: 'none' }}
+            >
+              {PROPERTY_TYPES.slice(0, VISIBLE_CATEGORIES).map(pt => (
+                <button
+                  key={pt.id}
+                  onClick={() => setActivePropertyType(activePropertyType === pt.id ? null : pt.id)}
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm whitespace-nowrap transition-all active:scale-95 shrink-0 ${
+                    activePropertyType === pt.id
+                      ? 'bg-[#C8932A] text-white shadow-sm'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:bg-gray-200'
+                  }`}
+                >
+                  <pt.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  {pt.label}
+                </button>
+              ))}
+              {/* Extra categories visible only on scroll */}
+              {PROPERTY_TYPES.slice(VISIBLE_CATEGORIES).map(pt => (
+                <button
+                  key={pt.id}
+                  onClick={() => setActivePropertyType(activePropertyType === pt.id ? null : pt.id)}
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm whitespace-nowrap transition-all active:scale-95 shrink-0 ${
+                    activePropertyType === pt.id
+                      ? 'bg-[#C8932A] text-white shadow-sm'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:bg-gray-200'
+                  }`}
+                >
+                  <pt.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  {pt.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Right scroll arrow */}
+            <button
+              onClick={() => scrollCategories('right')}
+              className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-90 transition-all"
+            >
+              <ChevronRight className="h-3.5 w-3.5 text-gray-500" />
+            </button>
+
+            {/* Divider */}
+            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 shrink-0" />
+
+            {/* MAP / NEAR ME / LIST in same row */}
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setActiveViewMode('list')}
+                className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all active:scale-95 ${
+                  activeViewMode === 'list'
+                    ? 'text-white bg-[#0E5C3B]'
+                    : 'text-gray-400 bg-gray-100 dark:bg-gray-800'
+                }`}
+              >
                 <List className="h-3 w-3" /> List
               </button>
-              <button className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium text-white bg-[#0E5C3B] active:scale-95 transition-all">
+              <button
+                onClick={() => setActiveViewMode('map')}
+                className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium transition-all active:scale-95 ${
+                  activeViewMode === 'map'
+                    ? 'text-white bg-[#0E5C3B]'
+                    : 'text-gray-400 bg-gray-100 dark:bg-gray-800'
+                }`}
+              >
                 <Map className="h-3 w-3" /> Map
+              </button>
+              <button className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium text-gray-400 bg-gray-100 dark:bg-gray-800 active:scale-95 transition-all active:text-[#0E5C3B]">
+                <Navigation className="h-3 w-3" /> Near Me
               </button>
             </div>
           </div>
