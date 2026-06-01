@@ -4,4 +4,4 @@
 cmd = "npx prisma generate && npm run build"
 
 [start]
-cmd = "npx prisma db push --accept-data-loss && npx prisma db seed && npm run start"
+cmd = "npx prisma db push --accept-data-loss 2>&1; npx prisma generate 2>&1; npx tsx prisma/seed.ts 2>&1; exec npx next start -p ${PORT:-3000} -H 0.0.0.0"
