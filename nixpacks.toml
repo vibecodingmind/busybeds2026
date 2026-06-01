@@ -1,0 +1,7 @@
+[phases.setup]
+
+[phases.build]
+cmd = "npm run build"
+
+[start]
+cmd = "npx prisma db push --accept-data-loss && npm run start"
