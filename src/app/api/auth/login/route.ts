@@ -3,6 +3,8 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { comparePassword, signToken } from '@/lib/auth'
 
+const TOKEN_NAME = 'busybeds-token'
+
 const loginSchema = z.object({
   email: z.email(),
   password: z.string().min(1, 'Password is required'),
@@ -41,9 +43,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if suspended
-    if (user.suspendedAt && !user.suspendedReason) {
-      // Suspended without reason - treat as suspended
-    }
     if (user.suspendedAt) {
       return NextResponse.json(
         { success: false, error: `Account suspended: ${user.suspendedReason || 'Contact support'}` },
@@ -66,7 +65,8 @@ export async function POST(request: NextRequest) {
       tokenVersion: user.tokenVersion,
     })
 
-    return NextResponse.json({
+    // Set token as HTTP-only cookie
+    const response = NextResponse.json({
       success: true,
       token,
       user: {
@@ -78,6 +78,16 @@ export async function POST(request: NextRequest) {
         emailVerified: user.emailVerified,
       },
     })
+
+    response.cookies.set(TOKEN_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    })
+
+    return response
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(
