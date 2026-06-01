@@ -33,7 +33,7 @@ RUN npx prisma generate
 # Build the Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-RUN npx next build --no-lint
+RUN npx next build
 
 # Stage 3: Runner
 FROM node:22-alpine AS runner
