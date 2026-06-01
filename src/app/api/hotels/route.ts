@@ -72,9 +72,18 @@ export async function GET(request: NextRequest) {
       db.hotel.count({ where }),
     ]);
 
+    // Parse JSON string fields for client consumption
+    const parsedHotels = hotels.map((hotel: Record<string, unknown>) => ({
+      ...hotel,
+      amenities: typeof hotel.amenities === 'string' ? JSON.parse(hotel.amenities) : hotel.amenities || [],
+      vibeTags: typeof hotel.vibeTags === 'string' ? JSON.parse(hotel.vibeTags) : hotel.vibeTags || [],
+      images: typeof hotel.images === 'string' ? JSON.parse(hotel.images) : hotel.images || [],
+      discountRules: typeof hotel.discountRules === 'string' ? JSON.parse(hotel.discountRules) : hotel.discountRules || [],
+    }));
+
     return NextResponse.json({
       success: true,
-      data: hotels,
+      data: parsedHotels,
       pagination: {
         page,
         limit,

@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MapPin, Star, Wifi, Car, Dumbbell, UtensilsCrossed, Waves, Phone, Globe, Heart, Share2, Clock, Ticket, Users, BedDouble, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCurrency } from '@/context/CurrencyContext';
+import { parseJsonField } from '@/lib/parse';
 import type { Hotel, RoomType, Review } from '@/types';
 
 const AMENITY_ICONS: Record<string, any> = {
@@ -77,7 +78,10 @@ export default function HotelDetailPage() {
     </div>
   );
 
-  const images = hotel.images && hotel.images.length > 0 ? hotel.images : [hotel.coverImage].filter(Boolean);
+  const images = (() => {
+    const imgs = parseJsonField<string[]>(hotel.images);
+    return imgs.length > 0 ? imgs : [hotel.coverImage].filter(Boolean);
+  })();
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -141,33 +145,39 @@ export default function HotelDetailPage() {
               <p className="text-muted-foreground mb-6 leading-relaxed">{hotel.descriptionLong || hotel.descriptionShort}</p>
 
               {/* Amenities */}
-              {hotel.amenities && hotel.amenities.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-lg mb-3">Amenities</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {hotel.amenities.map((amenity: string) => {
-                      const Icon = AMENITY_ICONS[amenity] || Wifi;
-                      return (
-                        <div key={amenity} className="flex items-center gap-2 text-sm">
-                          <Icon className="h-4 w-4 text-emerald" /> {amenity}
-                        </div>
-                      );
-                    })}
+              {(() => {
+                const amenities = parseJsonField<string[]>(hotel.amenities);
+                return amenities.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="font-semibold text-lg mb-3">Amenities</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {amenities.map((amenity: string) => {
+                        const Icon = AMENITY_ICONS[amenity] || Wifi;
+                        return (
+                          <div key={amenity} className="flex items-center gap-2 text-sm">
+                            <Icon className="h-4 w-4 text-emerald" /> {amenity}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Vibe Tags */}
-              {hotel.vibeTags && hotel.vibeTags.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-lg mb-3">Vibe</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {hotel.vibeTags.map((tag: string) => (
-                      <Badge key={tag} variant="secondary" className="px-3 py-1">{tag}</Badge>
-                    ))}
+              {(() => {
+                const tags = parseJsonField<string[]>(hotel.vibeTags);
+                return tags.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="font-semibold text-lg mb-3">Vibe</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {tags.map((tag: string) => (
+                        <Badge key={tag} variant="secondary" className="px-3 py-1">{tag}</Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {hotel.websiteUrl && (
                 <a href={hotel.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-emerald hover:underline text-sm flex items-center gap-1">

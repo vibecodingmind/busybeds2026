@@ -23,7 +23,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     ]);
 
     const avgRating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
-    return NextResponse.json({ success: true, data: { ...hotel, roomTypes, reviews, avgRating: Math.round(avgRating * 10) / 10, reviewCount: reviews.length } });
+    // Parse JSON string fields for client consumption
+    const parsedHotel = {
+      ...hotel,
+      amenities: typeof hotel.amenities === 'string' ? JSON.parse(hotel.amenities as string) : hotel.amenities || [],
+      vibeTags: typeof hotel.vibeTags === 'string' ? JSON.parse(hotel.vibeTags as string) : hotel.vibeTags || [],
+      images: typeof hotel.images === 'string' ? JSON.parse(hotel.images as string) : hotel.images || [],
+      discountRules: typeof hotel.discountRules === 'string' ? JSON.parse(hotel.discountRules as string) : hotel.discountRules || [],
+    };
+    return NextResponse.json({ success: true, data: { ...parsedHotel, roomTypes, reviews, avgRating: Math.round(avgRating * 10) / 10, reviewCount: reviews.length } });
   } catch (error) { console.error('Hotel GET error:', error); return NextResponse.json({ success: false, error: 'Failed to fetch hotel' }, { status: 500 }); }
 }
 

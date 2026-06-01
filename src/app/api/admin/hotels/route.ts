@@ -24,6 +24,15 @@ export async function GET(request: NextRequest) {
     });
     const total = await db.hotel.count({ where });
 
-    return NextResponse.json({ success: true, data: hotels, total, page, totalPages: Math.ceil(total / limit) });
+    // Parse JSON string fields for client consumption
+    const parsedHotels = hotels.map((hotel: Record<string, unknown>) => ({
+      ...hotel,
+      amenities: typeof hotel.amenities === 'string' ? JSON.parse(hotel.amenities as string) : hotel.amenities || [],
+      vibeTags: typeof hotel.vibeTags === 'string' ? JSON.parse(hotel.vibeTags as string) : hotel.vibeTags || [],
+      images: typeof hotel.images === 'string' ? JSON.parse(hotel.images as string) : hotel.images || [],
+      discountRules: typeof hotel.discountRules === 'string' ? JSON.parse(hotel.discountRules as string) : hotel.discountRules || [],
+    }));
+
+    return NextResponse.json({ success: true, data: parsedHotels, total, page, totalPages: Math.ceil(total / limit) });
   } catch (error) { return NextResponse.json({ success: false, error: 'Failed to fetch hotels' }, { status: 500 }); }
 }

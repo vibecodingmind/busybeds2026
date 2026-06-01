@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, MapPin, Star, ArrowRight, Check, Zap, Shield, Users, Globe, ChevronRight, Building2 } from 'lucide-react';
 import type { Hotel, SubscriptionPackage, FAQ } from '@/types';
+import { parseJsonField } from '@/lib/parse';
 
 const PLAN_FEATURES = [
   { name: 'Explorer', price: 'Free', coupons: '1 total', tiers: 'Standard', highlight: false },
@@ -172,13 +173,16 @@ export default function HomePage() {
                       </div>
                       <Badge variant="outline" className="text-xs">{hotel.tier}</Badge>
                     </div>
-                    {hotel.vibeTags && hotel.vibeTags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {hotel.vibeTags.slice(0, 3).map((tag: string) => (
-                          <span key={tag} className="text-[10px] px-2 py-0.5 bg-emerald/10 text-emerald rounded-full">{tag}</span>
-                        ))}
-                      </div>
-                    )}
+                    {(() => {
+                      const tags = parseJsonField<string[]>(hotel.vibeTags);
+                      return tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {tags.slice(0, 3).map((tag: string) => (
+                            <span key={tag} className="text-[10px] px-2 py-0.5 bg-emerald/10 text-emerald rounded-full">{tag}</span>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </Link>
