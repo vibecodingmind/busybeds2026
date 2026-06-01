@@ -79,16 +79,13 @@ model Hotel {
   discountPercent  Int       @default(15)
   couponValidDays  Int       @default(30)
   geoLat           Float?
-  googlePlaceId   String?
   geoLng           Float?
+  googlePlaceId    String?   @unique
   lastCouponAt     DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
   // Google Places import fields
-  phone            String?
-  address          String?
-  googlePlaceId    String?   @unique
   importSource     String?   // "google_places" | null
   isPartner        Boolean   @default(false)
   partnerDiscountPercent Int?  // set when marked as partner

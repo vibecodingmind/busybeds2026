@@ -9,7 +9,10 @@ WORKDIR /app
 COPY package.json bun.lock* package-lock.json* ./
 COPY prisma ./prisma/
 
-# Install dependencies
+# Provide a dummy DATABASE_URL for prisma generate during install
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+
+# Install dependencies (postinstall runs prisma generate)
 RUN npm install --legacy-peer-deps
 
 # Stage 2: Build
@@ -18,6 +21,9 @@ WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Provide a dummy DATABASE_URL for prisma generate during build
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
 # Generate Prisma client
 RUN npx prisma generate
