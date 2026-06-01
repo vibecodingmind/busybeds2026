@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  output: "standalone",
   reactStrictMode: false,
   allowedDevOrigins: [
     "preview-chat-a104d975-f463-479b-8fd6-c85ddc8e186a.space-z.ai",

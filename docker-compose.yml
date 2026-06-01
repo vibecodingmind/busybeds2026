@@ -1,0 +1,89 @@
+# ═══════════════════════════════════════════════════════════════
+# BusyBeds Production Docker Compose
+# Multi-app ready: Each app gets its own docker-compose file
+#
+# Usage:
+#   docker compose up -d          # Start BusyBeds
+#   docker compose logs -f        # View logs
+#   docker compose down            # Stop
+#   docker compose up -d --build  # Rebuild and start
+#
+# To add another app alongside BusyBeds:
+#   1. Create /var/www/another-app/docker-compose.yml
+#   2. docker compose -f /var/www/another-app/docker-compose.yml up -d
+# ═══════════════════════════════════════════════════════════════
+
+services:
+  # ── BusyBeds Next.js App ──
+  app:
+    container_name: busybeds-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://busybeds:${DB_PASSWORD:-BusyB3ds2026}@db:5432/busybeds_prod
+      - NODE_ENV=production
+      - PORT=3000
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - busybeds-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    labels:
+      - "com.busybeds.app=busybeds"
+      - "com.busybeds.role=web"
+
+  # ── PostgreSQL Database ──
+  db:
+    container_name: busybeds-db
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: busybeds_prod
+      POSTGRES_USER: busybeds
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-BusyB3ds2026}
+    volumes:
+      - busybeds-pgdata:/var/lib/postgresql/data
+    networks:
+      - busybeds-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U busybeds -d busybeds_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    labels:
+      - "com.busybeds.app=busybeds"
+      - "com.busybeds.role=database"
+
+volumes:
+  busybeds-pgdata:
+    driver: local
+    labels:
+      - "com.busybeds.app=busybeds"
+
+networks:
+  busybeds-network:
+    driver: bridge
+    labels:
+      - "com.busybeds.app=busybeds"
