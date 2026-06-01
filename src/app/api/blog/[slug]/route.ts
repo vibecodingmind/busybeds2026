@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-export async function GET(request: Request, { params }: { params: { slug: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   try {
+    const { slug } = await params;
     const post = await db.blogPost.findUnique({
-      where: { slug: params.slug, status: 'published' },
+      where: { slug: slug, status: 'published' },
     });
 
     if (!post) return NextResponse.json({ success: false, error: 'Post not found' }, { status: 404 });

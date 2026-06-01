@@ -8,9 +8,10 @@ async function getHotelByIdOrSlug(idOrSlug: string) {
   return hotel;
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const hotel = await getHotelByIdOrSlug(params.id);
+    const { id } = await params;
+    const hotel = await getHotelByIdOrSlug(id);
     if (!hotel) return NextResponse.json({ success: false, error: 'Hotel not found' }, { status: 404 });
 
     const [roomTypes, reviews] = await Promise.all([
@@ -35,11 +36,12 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   } catch (error) { console.error('Hotel GET error:', error); return NextResponse.json({ success: false, error: 'Failed to fetch hotel' }, { status: 500 }); }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session) return NextResponse.json({ success: false, error: 'Auth required' }, { status: 401 });
-    const hotel = await getHotelByIdOrSlug(params.id);
+    const hotel = await getHotelByIdOrSlug(id);
     if (!hotel) return NextResponse.json({ success: false, error: 'Hotel not found' }, { status: 404 });
     const isOwner = await db.hotelOwner.findFirst({ where: { userId: session.userId, hotelId: hotel.id } });
     if (session.role !== 'admin' && !isOwner) return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
@@ -59,11 +61,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   } catch (error) { console.error('Hotel PUT error:', error); return NextResponse.json({ success: false, error: 'Failed to update hotel' }, { status: 500 }); }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session || session.role !== 'admin') return NextResponse.json({ success: false, error: 'Admin required' }, { status: 403 });
-    const hotel = await getHotelByIdOrSlug(params.id);
+    const hotel = await getHotelByIdOrSlug(id);
     if (!hotel) return NextResponse.json({ success: false, error: 'Hotel not found' }, { status: 404 });
     await db.hotel.delete({ where: { id: hotel.id } });
     return NextResponse.json({ success: true, message: 'Hotel deleted' });

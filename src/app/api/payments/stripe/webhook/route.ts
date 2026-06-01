@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
             data: {
               status: 'completed',
               paidAt: new Date(),
-              stripeChargeId: session?.payment_intent || session?.id,
+              stripeChargeId: String(session?.payment_intent || session?.id || ''),
             },
           });
         }
@@ -79,13 +79,12 @@ export async function POST(request: NextRequest) {
       }
 
       case 'invoice.payment_succeeded': {
-        const invoiceData = event.data?.object;
-        const stripeInvoiceId = invoiceData?.id;
-        const stripeSubId = invoiceData?.subscription;
+        const invoiceData = event.data?.object as unknown as Record<string, unknown>;
+        const stripeSubId = invoiceData?.subscription as string | undefined;
 
         if (stripeSubId) {
           const sub = await db.subscription.findFirst({
-            where: { stripeSubId: stripeSubId as string },
+            where: { stripeSubId },
           });
 
           if (sub) {
@@ -93,10 +92,9 @@ export async function POST(request: NextRequest) {
               data: {
                 userId: sub.userId,
                 subscriptionId: sub.id,
-                amount: invoiceData?.amount_paid ? invoiceData.amount_paid / 100 : 0,
-                currency: invoiceData?.currency?.toUpperCase() || 'USD',
+                amount: invoiceData?.amount_paid ? Number(invoiceData.amount_paid) / 100 : 0,
+                currency: (invoiceData?.currency as string)?.toUpperCase() || 'USD',
                 status: 'paid',
-                stripeInvoiceId: stripeInvoiceId as string,
                 issuedAt: new Date(),
                 paidAt: new Date(),
               },

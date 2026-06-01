@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash password
-    const passwordHash = hashPassword(password)
+    const passwordHash = await hashPassword(password)
 
     // Generate email verification token
     const emailVerifyToken = uuidv4()

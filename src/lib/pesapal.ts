@@ -5,6 +5,7 @@ interface PesapalPaymentParams {
   phone?: string;
   description: string;
   callbackUrl: string;
+  reference?: string;
 }
 
 interface PesapalPaymentResult {
@@ -63,7 +64,7 @@ export async function initiatePayment(
           Authorization: `Bearer ${authData.token}`,
         },
         body: JSON.stringify({
-          id: `BB_${Date.now()}`,
+          id: params.reference || `BB_${Date.now()}`,
           currency: params.currency,
           amount: params.amount,
           description: params.description,

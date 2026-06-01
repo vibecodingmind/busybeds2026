@@ -36,6 +36,8 @@ export interface Hotel {
   vibeTags: string[];
   discountRules: unknown[];
   websiteUrl?: string;
+  phone?: string;
+  address?: string;
   status: string;
   partnershipStatus: string;
   tier: string;

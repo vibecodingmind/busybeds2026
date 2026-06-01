@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
 
@@ -16,7 +17,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (!ownerReply) return NextResponse.json({ success: false, error: 'Reply text required' }, { status: 400 });
 
     const review = await db.review.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { ownerReply, repliedAt: new Date() },
     });
 

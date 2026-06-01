@@ -3,15 +3,16 @@ import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { createNotification } from '@/lib/notifications';
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session || !['owner', 'manager', 'admin'].includes(session.role)) {
       return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
     }
 
     const stayRequest = await db.stayRequest.update({
-      where: { id: params.id },
+      where: { id: id },
       data: { status: 'approved', managerId: session.userId },
     });
 

@@ -241,10 +241,10 @@ export async function POST(request: NextRequest) {
     const totalUserCoupons = await db.coupon.count({ where: { userId: session.userId } });
     const isNewUser = totalUserCoupons === 0;
     const { discountPercent, ruleName } = getEffectiveDiscount(
-      hotel.discountRules,
+      Array.isArray(hotel.discountRules) ? hotel.discountRules : (typeof hotel.discountRules === 'string' ? JSON.parse(hotel.discountRules as string) : []),
       hotel.discountPercent,
       now,
-      isNewUser
+      { isNewUser }
     );
 
     // 11. Generate unique coupon code

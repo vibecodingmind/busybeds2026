@@ -167,7 +167,6 @@ export async function POST(request: NextRequest) {
       const checkoutResult = await createCheckoutSession({
         priceId: billingCycle === 'annual' ? pkg.stripePriceIdMonthly || undefined : pkg.stripePriceIdMonthly || undefined,
         amount,
-        currency: 'usd',
         successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/subscription?success=true`,
         cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/subscription?cancelled=true`,
         metadata: {

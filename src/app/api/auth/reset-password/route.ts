@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash new password, clear reset token, increment tokenVersion
-    const passwordHash = hashPassword(password)
+    const passwordHash = await hashPassword(password)
 
     await db.user.update({
       where: { id: user.id },

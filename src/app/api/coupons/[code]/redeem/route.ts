@@ -51,7 +51,7 @@ export async function POST(
 
     // Check within date range (startTime/endTime)
     const now = new Date();
-    if (!isWithinDateRange(now, coupon.startTime, coupon.endTime)) {
+    if (!isWithinDateRange(coupon.startTime ?? undefined, coupon.endTime ?? undefined)) {
       return NextResponse.json(
         { success: false, error: 'Coupon is not valid for this date range', message: `This coupon is valid from ${coupon.startTime ? new Date(coupon.startTime).toLocaleDateString() : 'now'} to ${coupon.endTime ? new Date(coupon.endTime).toLocaleDateString() : 'expiry'}` },
         { status: 400 }

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session || session.role !== 'admin') return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
 
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const sub = await db.subscription.create({
       data: {
-        userId: params.id,
+        userId: id,
         packageId,
         status: 'active',
         billingCycle: 'monthly',

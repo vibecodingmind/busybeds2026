@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Ticket, Star, Clock, MessageSquare, BarChart3, Edit, ReviewIcon } from 'lucide-react';
+import { Ticket, Star, Clock, MessageSquare, BarChart3, Edit } from 'lucide-react';
 
 export default function OwnerDashboardPage() {
   const { user, loading: authLoading } = useAuth();
