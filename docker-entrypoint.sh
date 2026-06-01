@@ -3,41 +3,41 @@
 # Runs migrations and starts the app
 set -e
 
-echo "🚀 Starting BusyBeds..."
+echo "=== BusyBeds Starting ==="
 
-# Use LOCAL prisma from node_modules (not npx which downloads latest)
+# Use LOCAL prisma from node_modules
 PRISMA="./node_modules/.bin/prisma"
 
 # Run Prisma migrations
-echo "📦 Running database migrations..."
+echo ">> Running database migrations..."
 $PRISMA migrate deploy 2>&1 || {
-  echo "⚠️  Migration failed, trying db push..."
+  echo "!! Migration failed, trying db push..."
   $PRISMA db push --accept-data-loss 2>&1 || {
-    echo "⚠️  DB push also failed, continuing anyway..."
+    echo "!! DB push also failed, continuing anyway..."
   }
 }
 
-# Generate Prisma client
-echo "🔧 Generating Prisma client..."
-$PRISMA generate 2>&1 || echo "⚠️  Prisma generate had issues"
-
 # Check if database is seeded
-echo "🌱 Checking if database needs seeding..."
-USER_COUNT=$(node -e "
-try {
-  const { PrismaClient } = require('@prisma/client');
-  const prisma = new PrismaClient();
-  prisma.user.count().then(c => { console.log(c); prisma.\$disconnect(); }).catch(() => { console.log('0'); prisma.\$disconnect(); });
-} catch(e) { console.log('0'); }
-" 2>/dev/null || echo "0")
+echo ">> Checking if database needs seeding..."
+USER_COUNT=$($PRISMA db execute --stdin 2>/dev/null <<'SQL' 2>/dev/null || echo "0"
+SELECT COUNT(*) FROM "User";
+SQL
+)
 
-if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
-  echo "🌱 Seeding database..."
-  npx tsx prisma/seed.ts 2>&1 || echo "⚠️  Seed may have partially failed"
+if [ "$USER_COUNT" = "0" ] 2>/dev/null || [ -z "$USER_COUNT" ]; then
+  echo ">> Seeding database..."
+  node -e "
+    const { execSync } = require('child_process');
+    try {
+      execSync('npx tsx prisma/seed.ts', { stdio: 'inherit' });
+    } catch(e) {
+      console.log('Seed may have partially failed, continuing...');
+    }
+  " 2>/dev/null || echo "!! Seed had issues, continuing..."
 else
-  echo "📊 Database already has data, skipping seed"
+  echo ">> Database already has data, skipping seed"
 fi
 
-# Start the Next.js server
-echo "🌐 Starting Next.js server on port $PORT..."
+# Start the Next.js standalone server
+echo ">> Starting Next.js server on port $PORT..."
 exec node server.js

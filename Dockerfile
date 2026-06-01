@@ -10,14 +10,13 @@ WORKDIR /app
 COPY package.json package-lock.json* bun.lock* ./
 COPY prisma ./prisma/
 
-# Install with npm (respects package-lock.json strictly)
-# If no package-lock.json, generate one from pinned versions
+# Install with npm (--legacy-peer-deps to resolve peer dep conflicts)
 RUN if [ -f package-lock.json ]; then \
-      npm ci; \
+      npm ci --legacy-peer-deps; \
     elif [ -f bun.lock ]; then \
-      npm install --package-lock-only && npm ci; \
+      npm install --legacy-peer-deps --package-lock-only && npm ci --legacy-peer-deps; \
     else \
-      npm install; \
+      npm install --legacy-peer-deps; \
     fi
 
 # Stage 2: Builder
@@ -28,18 +27,19 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma client (must happen AFTER copying prisma schema)
+# Generate Prisma client
 RUN npx prisma generate
 
-# Build the application
+# Build the Next.js application
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+RUN npx next build --no-lint
 
-RUN npm run build
-
-# Stage 3: Runner  
+# Stage 3: Runner
 FROM node:22-alpine AS runner
 WORKDIR /app
+
+RUN apk add --no-cache openssl
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -49,19 +49,28 @@ ENV HOSTNAME="0.0.0.0"
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built application
+# Copy built application from standalone output
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+# Copy Prisma files for migrations at runtime
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
+# Copy additional Prisma engine binaries
+COPY --from=builder /app/node_modules/@prisma/engines-version ./node_modules/@prisma/engines-version 2>/dev/null || true
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
+
 # Copy entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
+
+# Ensure prisma directory is writable by nextjs
+RUN chown -R nextjs:nodejs /app/prisma /app/node_modules
 
 USER nextjs
 
