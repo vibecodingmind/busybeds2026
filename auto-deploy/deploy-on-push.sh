@@ -37,10 +37,12 @@ echo "========================================="
 
 cd "$APP_DIR"
 
-# Step 1: Pull latest code
+# Step 1: Pull latest code (preserve .env)
 echo "[$(date -Iseconds)] Pulling latest code..."
+cp .env .env.backup 2>/dev/null || true
 git fetch origin
 git reset --hard origin/main
+cp .env.backup .env 2>/dev/null || true
 echo "[$(date -Iseconds)] Code updated to: $(git log --oneline -1)"
 
 # Step 2: Rebuild and restart Docker containers
