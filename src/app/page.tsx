@@ -279,11 +279,29 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0F1117] page-enter">
-      {/* Filter Section - Single Row: Tiers + Categories + View toggles */}
+      {/* Filter Section - Tiers sticky + scrollable Categories + View toggles */}
       <section className="bg-white dark:bg-[#1a1d27] border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-8 py-2.5">
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Left scroll arrow */}
+            {/* Tiers — sticky, never scroll */}
+            {TIERS.map(tier => (
+              <button
+                key={tier.id}
+                onClick={() => setActiveTier(tier.id)}
+                className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all active:scale-95 shrink-0 ${
+                  activeTier === tier.id
+                    ? 'bg-[#0E5C3B] text-white shadow-sm'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:bg-gray-200'
+                }`}
+              >
+                {tier.label}
+              </button>
+            ))}
+
+            {/* Divider between tiers and categories */}
+            <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 shrink-0" />
+
+            {/* Left scroll arrow for categories */}
             <button
               onClick={() => scrollCategories('left')}
               className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-90 transition-all"
@@ -291,31 +309,12 @@ export default function HomePage() {
               <ChevronLeft className="h-3.5 w-3.5 text-gray-500" />
             </button>
 
-            {/* Scrollable: Tiers + divider + Categories (6 visible, rest on scroll) */}
+            {/* Scrollable categories only — 6 visible, rest on swipe/scroll */}
             <div
               ref={categoryScrollRef}
               className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scroll-smooth scrollbar-hide flex-1"
               style={{ scrollbarWidth: 'none' }}
             >
-              {/* Tiers first */}
-              {TIERS.map(tier => (
-                <button
-                  key={tier.id}
-                  onClick={() => setActiveTier(tier.id)}
-                  className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all active:scale-95 shrink-0 ${
-                    activeTier === tier.id
-                      ? 'bg-[#0E5C3B] text-white shadow-sm'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 active:bg-gray-200'
-                  }`}
-                >
-                  {tier.label}
-                </button>
-              ))}
-
-              {/* Divider between tiers and categories */}
-              <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 shrink-0" />
-
-              {/* Property type categories - only 6 shown, rest scrolled into view */}
               {PROPERTY_TYPES.map(pt => (
                 <button
                   key={pt.id}
@@ -332,7 +331,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Right scroll arrow */}
+            {/* Right scroll arrow for categories */}
             <button
               onClick={() => scrollCategories('right')}
               className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-90 transition-all"
