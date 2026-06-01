@@ -1,23 +1,25 @@
 #!/bin/sh
 # BusyBeds Docker Entrypoint
 # Runs migrations and starts the app
-
 set -e
 
 echo "🚀 Starting BusyBeds..."
 
+# Use LOCAL prisma from node_modules (not npx which downloads latest)
+PRISMA="./node_modules/.bin/prisma"
+
 # Run Prisma migrations
 echo "📦 Running database migrations..."
-npx prisma migrate deploy 2>&1 || {
+$PRISMA migrate deploy 2>&1 || {
   echo "⚠️  Migration failed, trying db push..."
-  npx prisma db push --accept-data-loss 2>&1 || {
+  $PRISMA db push --accept-data-loss 2>&1 || {
     echo "⚠️  DB push also failed, continuing anyway..."
   }
 }
 
 # Generate Prisma client
 echo "🔧 Generating Prisma client..."
-npx prisma generate 2>&1 || echo "⚠️  Prisma generate had issues"
+$PRISMA generate 2>&1 || echo "⚠️  Prisma generate had issues"
 
 # Check if database is seeded
 echo "🌱 Checking if database needs seeding..."
@@ -31,7 +33,7 @@ try {
 
 if [ "$USER_COUNT" = "0" ] || [ -z "$USER_COUNT" ]; then
   echo "🌱 Seeding database..."
-  npx tsx prisma/seed.ts 2>&1 || npx prisma db seed 2>&1 || echo "⚠️  Seed may have partially failed"
+  npx tsx prisma/seed.ts 2>&1 || echo "⚠️  Seed may have partially failed"
 else
   echo "📊 Database already has data, skipping seed"
 fi
