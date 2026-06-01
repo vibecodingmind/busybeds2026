@@ -60,8 +60,8 @@ model Hotel {
   city             String
   country          String
   category         String    @default("Hotel")
-  descriptionShort String
-  descriptionLong  String
+  descriptionShort String    @default("")
+  descriptionLong  String    @default("")
   starRating       Int       @default(3)
   amenities        String    @default("[]")
   vibeTags         String    @default("[]")
@@ -84,6 +84,15 @@ model Hotel {
   lastCouponAt     DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+
+  // Google Places import fields
+  phone            String?
+  address          String?
+  googlePlaceId    String?   @unique
+  importSource     String?   // "google_places" | null
+  isPartner        Boolean   @default(false)
+  partnerDiscountPercent Int?  // set when marked as partner
+  importedAt       DateTime?
 
   roomTypes     RoomType[]
   reviews       Review[]

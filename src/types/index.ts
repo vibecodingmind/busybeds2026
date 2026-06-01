@@ -50,6 +50,14 @@ export interface Hotel {
   geoLat?: number;
   geoLng?: number;
   lastCouponAt?: string;
+  // Google Places import fields
+  phone?: string;
+  address?: string;
+  googlePlaceId?: string;
+  importSource?: string;
+  isPartner: boolean;
+  partnerDiscountPercent?: number;
+  importedAt?: string;
   roomTypes?: RoomType[];
   reviews?: Review[];
   avgRating?: number;
