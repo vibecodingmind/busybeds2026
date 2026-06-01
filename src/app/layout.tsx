@@ -6,8 +6,8 @@ import { AuthProvider } from "@/context/AuthContext";
 import { CurrencyProvider } from "@/context/CurrencyContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { ThemeProvider } from "next-themes";
-import { AppHeader } from "@/components/AppHeader";
-import { BottomTabBar } from "@/components/BottomTabBar";
+import { LayoutProvider } from "@/context/LayoutContext";
+import { LayoutContentWrapper } from "@/components/LayoutContentWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,16 +59,12 @@ export default function RootLayout({
           <AuthProvider>
             <CurrencyProvider>
               <NotificationProvider>
-                {/* Unified App Header — works on ALL screen sizes */}
-                <AppHeader />
-
-                {/* Main content with bottom padding for tab bar on all screens */}
-                <main className="flex-1 pb-20">{children}</main>
-
-                {/* Bottom Tab Bar — visible on ALL screen sizes (app-style) */}
-                <BottomTabBar />
-
-                <Toaster richColors position="top-center" />
+                <LayoutProvider>
+                  <LayoutContentWrapper>
+                    {children}
+                  </LayoutContentWrapper>
+                  <Toaster richColors position="top-center" />
+                </LayoutProvider>
               </NotificationProvider>
             </CurrencyProvider>
           </AuthProvider>
