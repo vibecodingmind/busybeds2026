@@ -40,3 +40,25 @@ Stage Summary:
 - Navbar redesigned with: BusyBeds logo, Home/Packages/Things To Do/Become a Host, language selector, dark mode, user profile
 - Homepage features: search bar, category filters, property type icons, horizontal scrollable hotel cards by city
 - Code pushed to GitHub and deployed to Railway successfully
+
+---
+Task ID: 1
+Agent: Main Agent
+Task: Major UX overhaul - remove Request Coupon, search in header, separate tiers/categories, demo login, app-like hotel detail
+
+Work Log:
+- Removed "Request Coupon" button from HotelCard component in homepage
+- Moved search bar into AppHeader (same row as logo + icons)
+- Separated TIERS (All/Standard/Premium/Luxury) from PROPERTY_TYPES (Hotels/Resort/Villa/etc)
+- Limited visible categories to 6 with left/right scroll arrows
+- Added MAP/NEAR ME/LIST filter buttons in same row as categories
+- Added demo login section on /login with Admin, Hotel Owner, Guest quick-login buttons
+- Completely rewrote hotel detail page (/hotels/[slug]) with app-like design: full-width image gallery, sticky bottom CTA, coupon modal
+- Removed ShoppingCart icon from hotel cards, kept only Heart
+- Build successful, pushed to GitHub, Railway deployed SUCCESS
+
+Stage Summary:
+- Homepage now has search integrated in header, separated tier/category filters, scroll arrows for categories
+- Login page has demo quick-login for 3 roles (admin/owner/guest)
+- Hotel detail page is fully app-like with swipeable images, sticky bottom CTA
+- Live at https://busybeds-web-production.up.railway.app/
