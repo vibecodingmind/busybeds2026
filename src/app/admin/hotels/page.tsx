@@ -646,11 +646,11 @@ export default function AdminHotelsPage() {
 
   /* ─── Render ─── */
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Hotel Management</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Hotel Management</h1>
           <p className="text-sm text-muted-foreground mt-1">{total} hotels total</p>
         </div>
         <div className="flex items-center gap-2">
@@ -672,8 +672,9 @@ export default function AdminHotelsPage() {
       {/* ===== HOTEL LIST VIEW ===== */}
       {activeView === 'list' && (
         <>
-          {/* Filters Row */}
-          <div className="flex flex-wrap gap-3 mb-6">
+          {/* Filters Card */}
+          <Card className="p-4">
+            <div className="flex flex-wrap gap-3">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -735,11 +736,12 @@ export default function AdminHotelsPage() {
                 <SelectItem value="LISTING_ONLY">Listing Only</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+            </div>
+          </Card>
 
           {/* Bulk Action Bar */}
           {selectedIds.size > 0 && (
-            <div className="flex items-center gap-3 p-3 mb-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <div className="flex items-center gap-2">
                 <CheckSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
@@ -836,6 +838,8 @@ export default function AdminHotelsPage() {
           </AlertDialog>
 
           {/* Hotel List */}
+          <Card className="overflow-hidden">
+            <div className="p-4">
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -843,11 +847,11 @@ export default function AdminHotelsPage() {
               ))}
             </div>
           ) : hotels.length === 0 ? (
-            <Card className="p-12 text-center">
+            <div className="py-12 text-center">
               <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
               <p className="text-lg font-medium text-muted-foreground">No hotels found</p>
               <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters or add a new hotel.</p>
-            </Card>
+            </div>
           ) : (
             <div className="space-y-2">
               {/* Select All Header Row */}
@@ -880,8 +884,8 @@ export default function AdminHotelsPage() {
                   })();
 
                   return (
-                    <Card key={hotel.id} className={`p-4 hover:shadow-md transition-shadow ${selectedIds.has(hotel.id) ? 'ring-2 ring-blue-400 bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
-                      <div className="flex items-center gap-4">
+                    <div key={hotel.id} className={`flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${selectedIds.has(hotel.id) ? 'bg-blue-50/80 dark:bg-blue-900/15 ring-1 ring-blue-200 dark:ring-blue-800' : ''}`}>
+                      <div className="flex items-center gap-4 w-full">
                         {/* Selection Checkbox */}
                         <button
                           onClick={() => toggleHotelSelect(hotel.id)}
@@ -991,7 +995,7 @@ export default function AdminHotelsPage() {
                           </div>
                         </div>
                       </div>
-                    </Card>
+                    </div>
                   );
                 })}
             </div>
@@ -999,20 +1003,22 @@ export default function AdminHotelsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6">
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
               <p className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </p>
               <div className="flex gap-2">
-                <Button variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
                   <ChevronLeft className="h-4 w-4 mr-1" /> Previous
                 </Button>
-                <Button variant="outline" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
                   Next <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
             </div>
           )}
+            </div>
+          </Card>
         </>
       )}
 

@@ -290,7 +290,7 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">User Management</h1>
+          <h1 className="text-2xl font-bold tracking-tight">User Management</h1>
           <p className="text-sm text-muted-foreground mt-1">
             <Users className="inline h-4 w-4 mr-1 -mt-0.5" />
             {total.toLocaleString()} total users
@@ -462,7 +462,8 @@ export default function AdminUsersPage() {
       </AlertDialog>
 
       {/* User Table */}
-      <div className="rounded-lg border overflow-hidden">
+      <Card className="overflow-hidden">
+        <div className="rounded-lg overflow-hidden">
         {/* Table Header */}
         <div className="hidden md:grid md:grid-cols-[40px_2fr_1fr_1fr_1fr_auto] gap-4 bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider items-center">
           <div>
@@ -614,10 +615,11 @@ export default function AdminUsersPage() {
             })}
           </div>
         )}
-      </div>
+        </div>
+      </Card>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-2">
         <p className="text-sm text-muted-foreground">
           Page {page} of {totalPages}
         </p>
