@@ -22,15 +22,32 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
+import {
   Search,
   Shield,
   Ban,
   Gift,
   Eye,
+  EyeOff,
   ChevronLeft,
   ChevronRight,
   Users,
+  CheckSquare,
+  Square,
+  X,
+  Trash,
+  Loader2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 type UserRole = 'traveler' | 'owner' | 'admin' | 'corporate';
 type UserStatus = 'active' | 'suspended' | 'banned';
@@ -137,6 +154,12 @@ export default function AdminUsersPage() {
   const [compPackageId, setCompPackageId] = useState('');
   const [compLoading, setCompLoading] = useState(false);
 
+  // Bulk selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<'activate' | 'suspend' | 'ban' | 'delete' | null>(null);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -146,6 +169,7 @@ export default function AdminUsersPage() {
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
+    setSelectedIds(new Set()); // Clear selection when filters change
   }, [debouncedSearch, roleFilter, statusFilter]);
 
   const fetchUsers = useCallback(() => {
@@ -208,6 +232,59 @@ export default function AdminUsersPage() {
     setCompPackageId('');
   };
 
+  /* ─── Bulk action helpers ─── */
+  const toggleUserSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAllUsers = () => {
+    if (users.every(u => selectedIds.has(u.id))) {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        users.forEach(u => next.delete(u.id));
+        return next;
+      });
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        users.forEach(u => next.add(u.id));
+        return next;
+      });
+    }
+  };
+
+  const allVisibleSelected = users.length > 0 && users.every(u => selectedIds.has(u.id));
+
+  const handleBulkAction = async () => {
+    if (!bulkAction || selectedIds.size === 0) return;
+    setBulkProcessing(true);
+    try {
+      const res = await fetch('/api/admin/users/bulk-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: bulkAction, userIds: Array.from(selectedIds) }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        toast.error(data.error || 'Bulk action failed');
+        return;
+      }
+      toast.success(data.message);
+      setSelectedIds(new Set());
+      setBulkAction(null);
+      setBulkConfirmOpen(false);
+      fetchUsers();
+    } catch {
+      toast.error('Something went wrong');
+    } finally {
+      setBulkProcessing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -224,7 +301,6 @@ export default function AdminUsersPage() {
       {/* Search + Filter Row */}
       <Card>
         <CardContent className="pt-6 space-y-4">
-          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -235,9 +311,7 @@ export default function AdminUsersPage() {
             />
           </div>
 
-          {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* Role Tabs */}
             <div className="flex-1">
               <p className="text-xs font-medium text-muted-foreground mb-2">Role</p>
               <div className="flex flex-wrap gap-1.5">
@@ -259,7 +333,6 @@ export default function AdminUsersPage() {
               </div>
             </div>
 
-            {/* Status Select */}
             <div className="sm:w-52">
               <p className="text-xs font-medium text-muted-foreground mb-2">Status</p>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -279,10 +352,128 @@ export default function AdminUsersPage() {
         </CardContent>
       </Card>
 
+      {/* Bulk Action Bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center gap-2">
+            <CheckSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+              {selectedIds.size} user{selectedIds.size !== 1 ? 's' : ''} selected
+            </span>
+          </div>
+          <div className="flex items-center gap-2 ml-auto flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-emerald text-emerald hover:bg-emerald hover:text-white"
+              onClick={() => { setBulkAction('activate'); setBulkConfirmOpen(true); }}
+              disabled={bulkProcessing}
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              Activate
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white"
+              onClick={() => { setBulkAction('suspend'); setBulkConfirmOpen(true); }}
+              disabled={bulkProcessing}
+            >
+              <Shield className="h-4 w-4 mr-1" />
+              Suspend
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-red-500 text-red-600 hover:bg-red-500 hover:text-white"
+              onClick={() => { setBulkAction('ban'); setBulkConfirmOpen(true); }}
+              disabled={bulkProcessing}
+            >
+              <Ban className="h-4 w-4 mr-1" />
+              Ban
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-destructive text-destructive hover:bg-destructive hover:text-white"
+              onClick={() => { setBulkAction('delete'); setBulkConfirmOpen(true); }}
+              disabled={bulkProcessing}
+            >
+              <Trash className="h-4 w-4 mr-1" />
+              Delete
+            </Button>
+            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-1" />
+            <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
+              <X className="h-4 w-4 mr-1" />
+              Clear
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Action Confirm Dialog */}
+      <AlertDialog open={bulkConfirmOpen} onOpenChange={setBulkConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkAction === 'delete' ? 'Delete Selected Users' : bulkAction === 'activate' ? 'Activate Selected Users' : bulkAction === 'suspend' ? 'Suspend Selected Users' : 'Ban Selected Users'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkAction === 'delete' ? (
+                <>Are you sure you want to <strong>permanently delete</strong> {selectedIds.size} user{selectedIds.size !== 1 ? 's' : ''}? This action cannot be undone. All associated data including reviews, favorites, and coupons will be removed.</>
+              ) : bulkAction === 'activate' ? (
+                <>Are you sure you want to <strong>activate</strong> {selectedIds.size} user{selectedIds.size !== 1 ? 's' : ''}? They will regain full access to their accounts.</>
+              ) : bulkAction === 'suspend' ? (
+                <>Are you sure you want to <strong>suspend</strong> {selectedIds.size} user{selectedIds.size !== 1 ? 's' : ''}? They will not be able to access their accounts.</>
+              ) : (
+                <>Are you sure you want to <strong>ban</strong> {selectedIds.size} user{selectedIds.size !== 1 ? 's' : ''}? They will be permanently blocked from the platform.</>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkProcessing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={
+                bulkAction === 'delete'
+                  ? 'bg-destructive hover:bg-destructive/90 text-white'
+                  : bulkAction === 'activate'
+                  ? 'bg-emerald hover:bg-emerald/90 text-white'
+                  : bulkAction === 'suspend'
+                  ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+              }
+              onClick={handleBulkAction}
+              disabled={bulkProcessing}
+            >
+              {bulkProcessing ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</>
+              ) : (
+                <>
+                  {bulkAction === 'delete' && <Trash className="h-4 w-4 mr-2" />}
+                  {bulkAction === 'activate' && <Eye className="h-4 w-4 mr-2" />}
+                  {bulkAction === 'suspend' && <Shield className="h-4 w-4 mr-2" />}
+                  {bulkAction === 'ban' && <Ban className="h-4 w-4 mr-2" />}
+                  {bulkAction === 'delete' ? 'Delete All' : bulkAction === 'activate' ? 'Activate All' : bulkAction === 'suspend' ? 'Suspend All' : 'Ban All'}
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* User Table */}
       <div className="rounded-lg border overflow-hidden">
         {/* Table Header */}
-        <div className="hidden md:grid md:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        <div className="hidden md:grid md:grid-cols-[40px_2fr_1fr_1fr_1fr_auto] gap-4 bg-muted/50 px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider items-center">
+          <div>
+            <button onClick={toggleSelectAllUsers} className="flex items-center transition-colors">
+              {allVisibleSelected ? (
+                <CheckSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              ) : (
+                <Square className="h-4 w-4 hover:text-gray-600" />
+              )}
+            </button>
+          </div>
           <div>User</div>
           <div>Role</div>
           <div>Status</div>
@@ -316,13 +507,37 @@ export default function AdminUsersPage() {
             {users.map((user) => {
               const status = getUserStatus(user);
               const initial = user.fullName?.charAt(0)?.toUpperCase() || 'U';
+              const isSelected = selectedIds.has(user.id);
               return (
                 <div
                   key={user.id}
-                  className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 md:gap-4 items-center px-4 py-3 hover:bg-muted/30 transition-colors"
+                  className={`grid grid-cols-1 md:grid-cols-[40px_2fr_1fr_1fr_1fr_auto] gap-2 md:gap-4 items-center px-4 py-3 hover:bg-muted/30 transition-colors ${isSelected ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
                 >
+                  {/* Checkbox */}
+                  <div className="hidden md:flex items-center">
+                    <button
+                      onClick={() => toggleUserSelect(user.id)}
+                      className={`transition-colors ${
+                        isSelected
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      {isSelected ? <CheckSquare className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+                    </button>
+                  </div>
+
                   {/* User Info */}
                   <div className="flex items-center gap-3 min-w-0">
+                    {/* Mobile checkbox */}
+                    <button
+                      onClick={() => toggleUserSelect(user.id)}
+                      className={`shrink-0 md:hidden transition-colors ${
+                        isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400'
+                      }`}
+                    >
+                      {isSelected ? <CheckSquare className="h-5 w-5" /> : <Square className="h-5 w-5" />}
+                    </button>
                     <div className="w-10 h-10 rounded-full bg-[#0E5C3B]/10 flex items-center justify-center text-sm font-bold text-[#0E5C3B] shrink-0">
                       {initial}
                     </div>
@@ -349,7 +564,6 @@ export default function AdminUsersPage() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-1 justify-end">
-                    {/* Mobile-only role/status row */}
                     <div className="md:hidden flex items-center gap-2 mr-2">
                       <RoleBadge role={user.role} />
                       <StatusBadge status={status} />
@@ -545,11 +759,7 @@ export default function AdminUsersPage() {
             <Button variant="outline" onClick={() => setBanUser(null)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              disabled={banLoading}
-              onClick={handleBan}
-            >
+            <Button variant="destructive" disabled={banLoading} onClick={handleBan}>
               {banLoading ? 'Banning...' : 'Ban User'}
             </Button>
           </DialogFooter>
