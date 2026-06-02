@@ -646,23 +646,23 @@ export default function AdminHotelsPage() {
 
   /* ─── Render ─── */
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8">
+      {/* Header - Airbnb style with lots of breathing room */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Hotel Management</h1>
-          <p className="text-sm text-muted-foreground mt-1">{total} hotels total</p>
+          <h1 className="text-[26px] font-bold tracking-tight text-gray-900 dark:text-white">Hotels</h1>
+          <p className="text-[15px] text-gray-500 dark:text-gray-400 mt-1.5">{total} hotels in your portfolio</p>
         </div>
         <div className="flex items-center gap-3">
           <Button
             variant={activeView === 'import' ? 'default' : 'outline'}
-            className={activeView === 'import' ? 'bg-[#ea4d60] hover:bg-[#d4424f] text-white' : ''}
+            className={`h-11 px-5 rounded-xl text-sm font-medium ${activeView === 'import' ? 'bg-[#ea4d60] hover:bg-[#d4424f] text-white' : 'border-gray-300 text-gray-700 hover:border-gray-900 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-gray-100'}`}
             onClick={() => setActiveView('import')}
           >
             <Globe className="h-4 w-4 mr-2" />
             Import from Google
           </Button>
-          <Button className="bg-emerald hover:bg-emerald/90 text-emerald-foreground" onClick={openAddModal}>
+          <Button className="h-11 px-5 rounded-xl text-sm font-medium bg-[#222] hover:bg-[#000] text-white dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100" onClick={openAddModal}>
             <Plus className="h-4 w-4 mr-2" />
             Add Hotel
           </Button>
@@ -672,34 +672,34 @@ export default function AdminHotelsPage() {
       {/* ===== HOTEL LIST VIEW ===== */}
       {activeView === 'list' && (
         <>
-          {/* Filters Card */}
-          <Card className="p-5">
-            <div className="space-y-4">
-              {/* Search Row */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1 min-w-[200px]">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {/* Filters - Airbnb search bar style */}
+          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-200/80 dark:border-gray-800 p-6 shadow-sm">
+            <div className="space-y-5">
+              {/* Search Row - Airbnb style search bar */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1 min-w-[220px]">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search hotels by name..."
-                    className="pl-10"
+                    className="pl-11 h-11 rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-[15px]"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
                 </div>
-                <div className="relative min-w-[180px] sm:w-[220px]">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="relative min-w-[200px] sm:w-[240px]">
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Filter by city..."
-                    className="pl-10"
+                    className="pl-11 h-11 rounded-xl border-gray-300 dark:border-gray-700 bg-white dark:bg-[#222] text-[15px]"
                     value={citySearch}
                     onChange={(e) => setCitySearch(e.target.value)}
                   />
                 </div>
               </div>
-              {/* Filter Dropdowns Row */}
+              {/* Filter Dropdowns Row - Airbnb pill-style filters */}
               <div className="flex flex-wrap gap-3">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-[150px] h-10 rounded-xl border-gray-300 dark:border-gray-700 text-sm">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -709,7 +709,7 @@ export default function AdminHotelsPage() {
                   </SelectContent>
                 </Select>
                 <Select value={tierFilter} onValueChange={setTierFilter}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-[150px] h-10 rounded-xl border-gray-300 dark:border-gray-700 text-sm">
                     <SelectValue placeholder="Tier" />
                   </SelectTrigger>
                   <SelectContent>
@@ -720,7 +720,7 @@ export default function AdminHotelsPage() {
                   </SelectContent>
                 </Select>
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-[150px]">
+                  <SelectTrigger className="w-[150px] h-10 rounded-xl border-gray-300 dark:border-gray-700 text-sm">
                     <SelectValue placeholder="Category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -731,7 +731,7 @@ export default function AdminHotelsPage() {
                   </SelectContent>
                 </Select>
                 <Select value={partnershipFilter} onValueChange={setPartnershipFilter}>
-                  <SelectTrigger className="w-[170px]">
+                  <SelectTrigger className="w-[170px] h-10 rounded-xl border-gray-300 dark:border-gray-700 text-sm">
                     <SelectValue placeholder="Partnership" />
                   </SelectTrigger>
                   <SelectContent>
@@ -743,11 +743,11 @@ export default function AdminHotelsPage() {
                 </Select>
               </div>
             </div>
-          </Card>
+          </div>
 
           {/* Bulk Action Bar */}
           {selectedIds.size > 0 && (
-            <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl">
               <div className="flex items-center gap-2">
                 <CheckSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
@@ -843,9 +843,9 @@ export default function AdminHotelsPage() {
             </AlertDialogContent>
           </AlertDialog>
 
-          {/* Hotel List */}
-          <Card className="overflow-hidden">
-            <div className="p-5">
+          {/* Hotel List - Airbnb style */}
+          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-200/80 dark:border-gray-800 shadow-sm">
+            <div className="p-6">
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -859,9 +859,9 @@ export default function AdminHotelsPage() {
               <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters or add a new hotel.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {/* Select All Header Row */}
-              <div className="flex items-center gap-4 px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-4 px-5 py-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
                 <button
                   onClick={toggleSelectAllHotels}
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -890,7 +890,7 @@ export default function AdminHotelsPage() {
                   })();
 
                   return (
-                    <div key={hotel.id} className={`flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-gray-200 dark:hover:border-gray-700 transition-all ${selectedIds.has(hotel.id) ? 'bg-blue-50/80 dark:bg-blue-900/15 ring-1 ring-blue-200 dark:ring-blue-800 border-blue-200 dark:border-blue-800' : ''}`}>
+                    <div key={hotel.id} className={`flex items-center gap-5 p-5 rounded-2xl border border-gray-200/70 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all ${selectedIds.has(hotel.id) ? 'bg-blue-50/60 dark:bg-blue-900/10 ring-1 ring-blue-200 dark:ring-blue-800 border-blue-200 dark:border-blue-800' : ''}`}>
                       <div className="flex items-center gap-4 w-full">
                         {/* Selection Checkbox */}
                         <button
@@ -908,7 +908,7 @@ export default function AdminHotelsPage() {
                           )}
                         </button>
                         {/* Thumbnail */}
-                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 shadow-sm">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 shadow-sm">
                           {hotel.coverImage ? (
                             <img src={hotel.coverImage} alt={hotel.name} className="w-full h-full object-cover" />
                           ) : images.length > 0 ? (
@@ -922,8 +922,8 @@ export default function AdminHotelsPage() {
 
                         {/* Hotel Info */}
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <p className="font-semibold truncate text-[15px]">{hotel.name}</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-semibold truncate text-[15px] text-gray-900 dark:text-white">{hotel.name}</p>
                             <div className="flex items-center gap-0.5">
                               {Array.from({ length: hotel.starRating }).map((_, i) => (
                                 <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
@@ -1009,31 +1009,31 @@ export default function AdminHotelsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <p className="text-sm text-muted-foreground">
-                Page <span className="font-medium text-foreground">{page}</span> of {totalPages}
+            <div className="flex items-center justify-between mt-8 pt-5 border-t border-gray-100 dark:border-gray-800">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Page <span className="font-semibold text-gray-900 dark:text-white">{page}</span> of {totalPages}
               </p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" className="h-9 px-4 rounded-xl" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
                   <ChevronLeft className="h-4 w-4 mr-1" /> Previous
                 </Button>
-                <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                <Button variant="outline" size="sm" className="h-9 px-4 rounded-xl" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
                   Next <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
             </div>
           )}
             </div>
-          </Card>
+          </div>
         </>
       )}
 
       {/* ===== GOOGLE PLACES IMPORT VIEW ===== */}
       {activeView === 'import' && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Search Panel */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-200/80 dark:border-gray-800 p-6 shadow-sm">
+            <h2 className="text-lg font-semibold mb-5 flex items-center gap-2">
               <Globe className="h-5 w-5 text-[#ea4d60]" />
               Search Hotels on Google Maps
             </h2>
@@ -1086,7 +1086,7 @@ export default function AdminHotelsPage() {
             </div>
 
             {/* Default settings for import */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
               <div className="space-y-2">
                 <Label>Default Tier for Imports</Label>
                 <Select value={importDefaultTier} onValueChange={(v) => {
@@ -1126,11 +1126,11 @@ export default function AdminHotelsPage() {
                 </Select>
               </div>
             </div>
-          </Card>
+          </div>
 
           {/* Results Panel */}
           {importResults.length > 0 && (
-            <Card className="p-6">
+            <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-200/80 dark:border-gray-800 p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h3 className="font-semibold">
@@ -1277,18 +1277,18 @@ export default function AdminHotelsPage() {
                   );
                 })}
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Empty state for import */}
           {importResults.length === 0 && !importSearching && (
-            <Card className="p-12 text-center">
+            <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-200/80 dark:border-gray-800 p-12 shadow-sm text-center">
               <Globe className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
               <p className="text-lg font-medium text-muted-foreground">Search Google Maps for Hotels</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Enter a query like &quot;hotels in Dar es Salaam&quot; to find up to 60 hotels to import. Photos will be downloaded directly to the server.
               </p>
-            </Card>
+            </div>
           )}
         </div>
       )}

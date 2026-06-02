@@ -193,10 +193,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-[#0F1117]">
+    <div className="flex min-h-screen bg-[#F7F7F7] dark:bg-[#0F1117]">
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex flex-col bg-white dark:bg-[#1a1d27] border-r border-gray-100 dark:border-gray-800 transition-all duration-300 ease-in-out shrink-0 ${
+        className={`hidden lg:flex flex-col bg-white dark:bg-[#1a1d27] border-r border-gray-200/60 dark:border-gray-800 transition-all duration-300 ease-in-out shrink-0 ${
           collapsed ? 'w-[68px]' : 'w-[240px]'
         }`}
       >
@@ -229,10 +229,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Main content */}
+      {/* Main content - Airbnb style with generous padding and max-width */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto p-5 sm:p-6 lg:p-8">
-          <div className="max-w-[1200px] mx-auto w-full">{children}</div>
+        <main className="flex-1 overflow-y-auto py-10 px-8 sm:px-12 lg:px-16 xl:px-20">
+          <div className="max-w-[1080px] mx-auto w-full">{children}</div>
         </main>
       </div>
     </div>
