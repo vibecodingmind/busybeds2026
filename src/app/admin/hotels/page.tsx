@@ -648,12 +648,12 @@ export default function AdminHotelsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Hotel Management</h1>
           <p className="text-sm text-muted-foreground mt-1">{total} hotels total</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <Button
             variant={activeView === 'import' ? 'default' : 'outline'}
             className={activeView === 'import' ? 'bg-[#ea4d60] hover:bg-[#d4424f] text-white' : ''}
@@ -673,69 +673,75 @@ export default function AdminHotelsPage() {
       {activeView === 'list' && (
         <>
           {/* Filters Card */}
-          <Card className="p-4">
-            <div className="flex flex-wrap gap-3">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search hotels..."
-                className="pl-10"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <div className="relative min-w-[160px]">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="City..."
-                className="pl-10"
-                value={citySearch}
-                onChange={(e) => setCitySearch(e.target.value)}
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={tierFilter} onValueChange={setTierFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Tier" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Tiers</SelectItem>
-                <SelectItem value="standard">Standard</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-                <SelectItem value="luxury">Luxury</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                {HOTEL_TYPES.map(t => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={partnershipFilter} onValueChange={setPartnershipFilter}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Partnership" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Partnerships</SelectItem>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="LISTING_ONLY">Listing Only</SelectItem>
-              </SelectContent>
-            </Select>
+          <Card className="p-5">
+            <div className="space-y-4">
+              {/* Search Row */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search hotels by name..."
+                    className="pl-10"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+                <div className="relative min-w-[180px] sm:w-[220px]">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Filter by city..."
+                    className="pl-10"
+                    value={citySearch}
+                    onChange={(e) => setCitySearch(e.target.value)}
+                  />
+                </div>
+              </div>
+              {/* Filter Dropdowns Row */}
+              <div className="flex flex-wrap gap-3">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={tierFilter} onValueChange={setTierFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Tier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Tiers</SelectItem>
+                    <SelectItem value="standard">Standard</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="luxury">Luxury</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    {HOTEL_TYPES.map(t => (
+                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={partnershipFilter} onValueChange={setPartnershipFilter}>
+                  <SelectTrigger className="w-[170px]">
+                    <SelectValue placeholder="Partnership" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Partnerships</SelectItem>
+                    <SelectItem value="ACTIVE">Active</SelectItem>
+                    <SelectItem value="PENDING">Pending</SelectItem>
+                    <SelectItem value="LISTING_ONLY">Listing Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </Card>
 
@@ -839,7 +845,7 @@ export default function AdminHotelsPage() {
 
           {/* Hotel List */}
           <Card className="overflow-hidden">
-            <div className="p-4">
+            <div className="p-5">
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -853,9 +859,9 @@ export default function AdminHotelsPage() {
               <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters or add a new hotel.</p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {/* Select All Header Row */}
-              <div className="flex items-center gap-4 px-4 py-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <div className="flex items-center gap-4 px-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800">
                 <button
                   onClick={toggleSelectAllHotels}
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -884,7 +890,7 @@ export default function AdminHotelsPage() {
                   })();
 
                   return (
-                    <div key={hotel.id} className={`flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors ${selectedIds.has(hotel.id) ? 'bg-blue-50/80 dark:bg-blue-900/15 ring-1 ring-blue-200 dark:ring-blue-800' : ''}`}>
+                    <div key={hotel.id} className={`flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:border-gray-200 dark:hover:border-gray-700 transition-all ${selectedIds.has(hotel.id) ? 'bg-blue-50/80 dark:bg-blue-900/15 ring-1 ring-blue-200 dark:ring-blue-800 border-blue-200 dark:border-blue-800' : ''}`}>
                       <div className="flex items-center gap-4 w-full">
                         {/* Selection Checkbox */}
                         <button
@@ -902,7 +908,7 @@ export default function AdminHotelsPage() {
                           )}
                         </button>
                         {/* Thumbnail */}
-                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0">
+                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shrink-0 shadow-sm">
                           {hotel.coverImage ? (
                             <img src={hotel.coverImage} alt={hotel.name} className="w-full h-full object-cover" />
                           ) : images.length > 0 ? (
@@ -916,16 +922,16 @@ export default function AdminHotelsPage() {
 
                         {/* Hotel Info */}
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold truncate">{hotel.name}</p>
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <p className="font-semibold truncate text-[15px]">{hotel.name}</p>
                             <div className="flex items-center gap-0.5">
                               {Array.from({ length: hotel.starRating }).map((_, i) => (
                                 <Star key={i} className="h-3 w-3 fill-amber-400 text-amber-400" />
                               ))}
                             </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">
-                            <MapPin className="h-3 w-3 inline mr-1" />
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            <MapPin className="h-3.5 w-3.5 inline mr-1 opacity-60" />
                             {hotel.city}, {hotel.country}
                             {hotel.region && <span className="ml-2 text-xs text-gray-400">({hotel.region})</span>}
                             {hotel.phone && <span className="ml-3 text-xs">📞 {hotel.phone}</span>}
@@ -1003,9 +1009,9 @@ export default function AdminHotelsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
               <p className="text-sm text-muted-foreground">
-                Page {page} of {totalPages}
+                Page <span className="font-medium text-foreground">{page}</span> of {totalPages}
               </p>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
