@@ -1,7 +1,31 @@
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2026-05-27.dahlia',
+// Lazy-initialized Stripe client to avoid build errors when STRIPE_SECRET_KEY is not set
+let _stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    _stripe = new Stripe(key, {
+      apiVersion: '2026-05-27.dahlia',
+    });
+  }
+  return _stripe;
+}
+
+// Proxy that lazily initializes Stripe on first property access
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    const instance = getStripe();
+    const value = (instance as any)[prop];
+    if (typeof value === 'function') {
+      return value.bind(instance);
+    }
+    return value;
+  },
 });
 
 export async function createCheckoutSession({
@@ -59,5 +83,3 @@ export async function handleWebhook(payload: string, signature: string) {
     return { valid: false, event: null };
   }
 }
-
-export { stripe };
