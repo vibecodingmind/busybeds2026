@@ -17,11 +17,10 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
   const [hideChrome, setHideChrome] = useState(false);
   const pathname = usePathname();
 
-  // Auto-detect admin/owner routes and hide chrome
   useEffect(() => {
     const isAdmin = pathname?.startsWith('/admin');
-    const isOwner = pathname?.startsWith('/owner');
-    setHideChrome(isAdmin || isOwner);
+    const isOwnerDashboard = pathname?.startsWith('/owner') && !pathname?.startsWith('/owner/onboard');
+    setHideChrome(isAdmin || isOwnerDashboard);
   }, [pathname]);
 
   return (

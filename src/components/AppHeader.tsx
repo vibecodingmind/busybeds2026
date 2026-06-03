@@ -12,16 +12,19 @@ import { Badge } from '@/components/ui/badge';
 import {
   Bell, Sun, Moon, User, Heart, MessageSquare, Settings,
   LogOut, Shield, Building2, Search, MapPin, ChevronDown, LogIn, UserPlus,
+  Ticket, Compass,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenuLabel, DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 
 /**
  * AppHeader — Airbnb-style compact header.
- * [Logo] [Search with Near Me icon] [Currency Switch] [Become Host] [Theme toggle] [Avatar]
+ * [Logo] [Search with Near Me icon] [Currency Switch] [Theme toggle] [Avatar]
+ * Nav items (Coupons, Saved, Become a Host) are in the avatar dropdown.
  */
 export function AppHeader() {
   const { user, logout } = useAuth();
@@ -40,12 +43,8 @@ export function AppHeader() {
   const handleNearMe = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        () => {
-          window.location.href = '/?nearby=true';
-        },
-        () => {
-          window.location.href = '/?nearby=true';
-        }
+        () => { window.location.href = '/?nearby=true'; },
+        () => { window.location.href = '/?nearby=true'; }
       );
     } else {
       window.location.href = '/?nearby=true';
@@ -70,7 +69,6 @@ export function AppHeader() {
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
           />
-          {/* Near Me button inside search bar */}
           <button
             onClick={handleNearMe}
             className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -108,8 +106,8 @@ export function AppHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Become a Host — desktop only */}
-          <Link href="/owner/register" className="hidden lg:inline-flex">
+          {/* Become a Host — desktop, always visible */}
+          <Link href="/owner/onboard" className="hidden lg:inline-flex">
             <Button
               variant="ghost"
               size="sm"
@@ -165,13 +163,22 @@ export function AppHeader() {
                   <Link href="/profile" className="flex items-center gap-2"><User className="h-4 w-4" /> Dashboard</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/favorites" className="flex items-center gap-2"><Heart className="h-4 w-4" /> Favorites</Link>
+                  <Link href="/coupon-history" className="flex items-center gap-2"><Ticket className="h-4 w-4" /> My Coupons</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/favorites" className="flex items-center gap-2"><Heart className="h-4 w-4" /> Saved</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/messages" className="flex items-center gap-2"><MessageSquare className="h-4 w-4" /> Messages</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings" className="flex items-center gap-2"><Settings className="h-4 w-4" /> Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/owner/onboard" className="flex items-center gap-2 text-[#0E5C3B] dark:text-[#10b981] font-medium">
+                    <Building2 className="h-4 w-4" /> Become a Host
+                  </Link>
                 </DropdownMenuItem>
                 {['owner', 'manager'].includes(user.role) && (
                   <DropdownMenuItem asChild>
@@ -199,7 +206,7 @@ export function AppHeader() {
                   <User className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-40" align="end">
+              <DropdownMenuContent className="w-48" align="end">
                 <DropdownMenuItem asChild>
                   <Link href="/login" className="flex items-center gap-2">
                     <LogIn className="h-4 w-4" /> Log in
@@ -209,6 +216,12 @@ export function AppHeader() {
                 <DropdownMenuItem asChild>
                   <Link href="/register" className="flex items-center gap-2">
                     <UserPlus className="h-4 w-4" /> Sign up
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/owner/onboard" className="flex items-center gap-2 text-[#0E5C3B] dark:text-[#10b981] font-medium">
+                    <Building2 className="h-4 w-4" /> Become a Host
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
