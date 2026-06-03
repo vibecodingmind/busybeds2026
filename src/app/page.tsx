@@ -9,7 +9,7 @@ import {
   MapPin, Star, Heart, ChevronLeft, ChevronRight,
   Hotel, Castle, Palmtree,
   Building2, Waves, TreePalm, Tent, Mountain, Landmark,
-  Home, ArrowRight, Shield, Ticket, Sparkles
+  Home, ArrowRight, Shield, Ticket, Sparkles, Users, Globe2, TrendingUp
 } from 'lucide-react';
 import type { Hotel as HotelType } from '@/types';
 import { parseJsonField } from '@/lib/parse';
@@ -28,12 +28,12 @@ const PROPERTY_TYPES = [
 ];
 
 const CITY_SECTIONS = [
-  { title: 'Where to stay in Arusha', city: 'Arusha' },
-  { title: 'Available in Dar es Salaam', city: 'Dar es Salaam' },
-  { title: 'Popular stays in Zanzibar', city: 'Zanzibar' },
-  { title: 'Discover in Dodoma', city: 'Dodoma' },
-  { title: 'Top picks in Nairobi', city: 'Nairobi' },
-  { title: 'Best in Mombasa', city: 'Mombasa' },
+  { title: 'Where to stay in Arusha', city: 'Arusha', emoji: '🏔️' },
+  { title: 'Available in Dar es Salaam', city: 'Dar es Salaam', emoji: '🌆' },
+  { title: 'Popular stays in Zanzibar', city: 'Zanzibar', emoji: '🏝️' },
+  { title: 'Discover in Dodoma', city: 'Dodoma', emoji: '🏛️' },
+  { title: 'Top picks in Nairobi', city: 'Nairobi', emoji: '🏙️' },
+  { title: 'Best in Mombasa', city: 'Mombasa', emoji: '🌊' },
 ];
 
 function HotelCard({ hotel }: { hotel: HotelType }) {
@@ -154,9 +154,9 @@ function HotelSection({ title, hotels, loading }: { title: string; hotels: Hotel
   };
 
   return (
-    <section className="py-8 sm:py-10">
-      <div className="max-w-[1200px] mx-auto px-6 md:px-10">
-        <div className="flex justify-between items-center mb-5">
+    <section className="py-10 sm:py-14">
+      <div className="max-w-[1120px] mx-auto px-6 md:px-10">
+        <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
           <div className="hidden sm:flex items-center gap-2">
             <button onClick={() => scroll('left')}
@@ -224,78 +224,123 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0F1117]">
-      {/* ===== HERO SECTION (Airbnb-inspired) ===== */}
-      <section className="relative bg-gradient-to-br from-[#0E5C3B] via-[#0a4d31] to-[#0E5C3B] dark:from-[#0F1117] dark:via-[#0F1117] dark:to-[#1a1d27] overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#C8932A] rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#ea4d60] rounded-full filter blur-3xl translate-y-1/2 -translate-x-1/2" />
+
+      {/* HERO SECTION - Full-width Airbnb-style */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1600&q=80"
+            alt="Beautiful hotel"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
         </div>
-        <div className="relative max-w-[1200px] mx-auto px-6 md:px-10 py-16 md:py-24">
+
+        <div className="relative max-w-[1120px] mx-auto px-6 md:px-10 py-20 md:py-32">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-5 w-5 text-[#C8932A]" />
-              <span className="text-sm font-medium text-[#C8932A]">Exclusive Member Discounts</span>
+            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-full px-4 py-1.5 mb-6">
+              <Sparkles className="h-4 w-4 text-[#C8932A]" />
+              <span className="text-sm font-medium text-white/90">Exclusive Member Discounts</span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-[56px] font-bold text-white leading-tight mb-4">
+            <h1 className="text-4xl md:text-5xl lg:text-[60px] font-bold text-white leading-[1.1] mb-5">
               Save up to <span className="text-[#C8932A]">50%</span> on Africa&apos;s best hotels
             </h1>
-            <p className="text-lg md:text-xl text-white/70 mb-8 leading-relaxed">
-              Get exclusive discount coupons for premium hotels across Tanzania, Kenya, Zanzibar, and more. Subscribe and start saving today.
+            <p className="text-lg md:text-xl text-white/75 mb-10 leading-relaxed">
+              Unlock exclusive discount coupons for premium hotels across Tanzania, Kenya, Zanzibar, and more. Subscribe and start saving today.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/hotels">
-                <Button className="bg-white text-[#0E5C3B] hover:bg-gray-100 rounded-lg px-8 h-12 text-base font-semibold shadow-lg w-full sm:w-auto">
+                <Button className="bg-white text-gray-900 hover:bg-gray-100 rounded-xl px-8 h-12 text-base font-semibold shadow-xl w-full sm:w-auto transition-all hover:shadow-2xl">
                   Explore Hotels <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/subscribe">
-                <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-lg px-8 h-12 text-base font-semibold w-full sm:w-auto">
+                <Button className="bg-[#ea4d60] hover:bg-[#d4424f] text-white rounded-xl px-8 h-12 text-base font-semibold shadow-xl w-full sm:w-auto transition-all hover:shadow-2xl">
                   <Ticket className="mr-2 h-4 w-4" /> Get Coupons
                 </Button>
               </Link>
             </div>
           </div>
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-white/10 max-w-lg">
+
+          <div className="grid grid-cols-3 gap-8 mt-14 pt-8 border-t border-white/15 max-w-md">
             <div>
-              <p className="text-2xl md:text-3xl font-bold text-white">{allHotels.length || '20'}+</p>
-              <p className="text-sm text-white/50 mt-0.5">Hotels</p>
+              <p className="text-3xl md:text-4xl font-bold text-white">{allHotels.length || '20'}+</p>
+              <p className="text-sm text-white/50 mt-1">Hotels</p>
             </div>
             <div>
-              <p className="text-2xl md:text-3xl font-bold text-white">50%</p>
-              <p className="text-sm text-white/50 mt-0.5">Max Savings</p>
+              <p className="text-3xl md:text-4xl font-bold text-white">50%</p>
+              <p className="text-sm text-white/50 mt-1">Max Savings</p>
             </div>
             <div>
-              <p className="text-2xl md:text-3xl font-bold text-white">5+</p>
-              <p className="text-sm text-white/50 mt-0.5">Countries</p>
+              <p className="text-3xl md:text-4xl font-bold text-white">5+</p>
+              <p className="text-sm text-white/50 mt-1">Countries</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===== TRUST BAR ===== */}
-      <section className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
-        <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-4">
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-500 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-[#0E5C3B] dark:text-[#10b981]" />
+      {/* TRUST BAR */}
+      <section className="bg-white dark:bg-[#0F1117] border-b border-gray-100 dark:border-gray-800">
+        <div className="max-w-[1120px] mx-auto px-6 md:px-10 py-5">
+          <div className="flex items-center justify-center gap-10 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#0E5C3B]/10 flex items-center justify-center">
+                <Shield className="h-4 w-4 text-[#0E5C3B] dark:text-[#10b981]" />
+              </div>
               <span>Verified Hotels</span>
             </div>
-            <div className="hidden sm:flex items-center gap-2">
-              <Ticket className="h-4 w-4 text-[#ea4d60]" />
+            <div className="hidden sm:flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#ea4d60]/10 flex items-center justify-center">
+                <Ticket className="h-4 w-4 text-[#ea4d60]" />
+              </div>
               <span>Instant Coupons</span>
             </div>
-            <div className="hidden md:flex items-center gap-2">
-              <Star className="h-4 w-4 text-[#C8932A]" />
+            <div className="hidden md:flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-[#C8932A]/10 flex items-center justify-center">
+                <Star className="h-4 w-4 text-[#C8932A]" />
+              </div>
               <span>Best Prices</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===== CATEGORY FILTERS ===== */}
+      {/* HOW IT WORKS */}
+      <section className="bg-white dark:bg-[#0F1117]">
+        <div className="max-w-[1120px] mx-auto px-6 md:px-10 py-14 md:py-20">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">How BusyBeds Works</h2>
+            <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto">Three simple steps to unlock massive savings on premium African hotels</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+            <div className="text-center group">
+              <div className="w-16 h-16 rounded-2xl bg-[#0E5C3B]/10 dark:bg-[#10b981]/10 flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform duration-300">
+                <Globe2 className="h-8 w-8 text-[#0E5C3B] dark:text-[#10b981]" />
+              </div>
+              <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">Browse Hotels</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Explore our curated collection of verified hotels across Africa, from beachfront resorts to safari lodges.</p>
+            </div>
+            <div className="text-center group">
+              <div className="w-16 h-16 rounded-2xl bg-[#ea4d60]/10 flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform duration-300">
+                <Ticket className="h-8 w-8 text-[#ea4d60]" />
+              </div>
+              <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">Get Coupons</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Subscribe and instantly generate exclusive discount coupons for partner hotels. Save up to 50% on your stay.</p>
+            </div>
+            <div className="text-center group">
+              <div className="w-16 h-16 rounded-2xl bg-[#C8932A]/10 flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="h-8 w-8 text-[#C8932A]" />
+              </div>
+              <h3 className="font-semibold text-lg text-gray-900 dark:text-white mb-2">Save Big</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Present your coupon at check-in and enjoy premium stays at fraction of the price. It is that simple.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CATEGORY FILTERS */}
       <section className="bg-white dark:bg-[#0F1117] border-b border-gray-100 dark:border-gray-800 sticky top-14 z-30">
-        <div className="max-w-[1200px] mx-auto px-6 md:px-10 py-3">
+        <div className="max-w-[1120px] mx-auto px-6 md:px-10 py-3">
           <div className="flex items-center gap-2">
             <button onClick={() => scrollCategories('left')}
               className="w-7 h-7 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
@@ -332,7 +377,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== HOTEL SECTIONS BY CITY ===== */}
+      {/* HOTEL SECTIONS BY CITY */}
       <div>
         {CITY_SECTIONS.map(section => {
           const cityHotels = getHotelsForCity(section.city);
@@ -348,22 +393,31 @@ export default function HomePage() {
           <HotelSection title="Available Hotels" hotels={filterByPropertyType(allHotels).slice(0, 12)} loading={loading} />
         )}
 
-        {/* CTA Section */}
-        <section className="py-16 md:py-20">
-          <div className="max-w-[1200px] mx-auto px-6 md:px-10">
-            <div className="bg-gradient-to-br from-[#0E5C3B] to-[#0a4d31] dark:from-[#1a1d27] dark:to-[#0F1117] rounded-2xl p-8 md:p-12 text-center">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Ready to save on your next stay?</h2>
-              <p className="text-white/60 mb-6 max-w-lg mx-auto">Subscribe to BusyBeds and get exclusive discount coupons for premium hotels across Africa.</p>
-              <Link href="/subscribe">
-                <Button className="bg-[#C8932A] hover:bg-[#b8841f] text-white rounded-lg px-8 h-12 text-base font-semibold shadow-lg">
-                  <Ticket className="mr-2 h-4 w-4" /> Subscribe Now
-                </Button>
-              </Link>
+        {/* CTA SECTION */}
+        <section className="py-16 md:py-24">
+          <div className="max-w-[1120px] mx-auto px-6 md:px-10">
+            <div className="relative bg-gradient-to-br from-[#0E5C3B] to-[#0a4d31] dark:from-[#1a1d27] dark:to-[#0F1117] rounded-2xl p-10 md:p-16 text-center overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-[#C8932A]/10 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#ea4d60]/10 rounded-full filter blur-3xl translate-y-1/2 -translate-x-1/2" />
+              <div className="relative">
+                <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">Ready to save on your next stay?</h2>
+                <p className="text-white/60 mb-8 max-w-lg mx-auto text-lg">Subscribe to BusyBeds and get exclusive discount coupons for premium hotels across Africa.</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link href="/subscribe">
+                    <Button className="bg-[#C8932A] hover:bg-[#b8841f] text-white rounded-xl px-8 h-12 text-base font-semibold shadow-lg transition-all hover:shadow-xl">
+                      <Ticket className="mr-2 h-4 w-4" /> Subscribe Now
+                    </Button>
+                  </Link>
+                  <Link href="/hotels">
+                    <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-xl px-8 h-12 text-base font-semibold">
+                      Browse All Hotels
+                    </Button>
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
-
-        <div className="h-4" />
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import {
   MapPin, Star, Wifi, Car, Dumbbell, UtensilsCrossed, Waves,
   Phone, Globe, Heart, Share2, Ticket, Users, BedDouble,
   ChevronLeft, ChevronRight, Send, X, Grid3X3, Image as ImageIcon,
-  Check, Shield, CalendarDays, ArrowLeft
+  Check, Shield, CalendarDays, ArrowLeft, Clock, Zap
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useCurrency } from '@/context/CurrencyContext';
@@ -197,7 +197,7 @@ export default function HotelDetailPage() {
                 {hotel.category && (
                   <>
                     <span className="text-gray-300 dark:text-gray-600">|</span>
-                    <Badge variant="outline" className="text-xs px-2 py-0.5 rounded-md font-normal">{hotel.category}</Badge>
+                    <Badge className="text-xs px-2.5 py-0.5 rounded-md font-medium bg-[#0E5C3B]/10 text-[#0E5C3B] dark:bg-[#10b981]/10 dark:text-[#10b981] border-0">{hotel.category}</Badge>
                   </>
                 )}
               </div>
@@ -360,12 +360,17 @@ export default function HotelDetailPage() {
           {/* ===== RIGHT COLUMN: Booking Card (Airbnb-style sticky sidebar) ===== */}
           <div className="hidden lg:block">
             <div className="sticky top-28">
-              <div className="border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg p-6">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-6 bg-white dark:bg-[#1a1d27]">
                 {isPartner ? (
                   <>
-                    <div className="flex items-baseline gap-2 mb-1">
-                      <span className="text-2xl font-bold text-[#ea4d60]">{hotel.discountPercent}%</span>
-                      <span className="text-sm text-gray-500">member discount</span>
+                    <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ea4d60]/10 to-[#ea4d60]/5 flex items-center justify-center shrink-0">
+                        <Zap className="h-6 w-6 text-[#ea4d60]" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-[#ea4d60]">{hotel.discountPercent}% OFF</p>
+                        <p className="text-xs text-gray-500">member discount</p>
+                      </div>
                     </div>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">Subscribe to unlock exclusive coupons for this hotel</p>
 
@@ -396,7 +401,7 @@ export default function HotelDetailPage() {
                     </div>
 
                     <Button
-                      className="w-full bg-[#ea4d60] hover:bg-[#d4424f] text-white rounded-lg h-12 text-base font-semibold active:scale-[0.98] transition-all"
+                      className="w-full bg-gradient-to-r from-[#ea4d60] to-[#d4424f] hover:from-[#d4424f] hover:to-[#c33a42] text-white rounded-xl h-12 text-base font-semibold active:scale-[0.98] transition-all shadow-lg shadow-[#ea4d60]/20 hover:shadow-xl hover:shadow-[#ea4d60]/30"
                       onClick={handleGenerateCoupon}
                       disabled={generating}
                     >
