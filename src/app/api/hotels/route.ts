@@ -68,18 +68,31 @@ export async function GET(request: NextRequest) {
         orderBy,
         skip,
         take: limit,
+        include: {
+          roomTypes: {
+            where: { isActive: true },
+            select: { pricePerNight: true },
+            orderBy: { pricePerNight: 'asc' },
+          },
+        },
       }),
       db.hotel.count({ where }),
     ]);
 
-    // Parse JSON string fields for client consumption
-    const parsedHotels = hotels.map((hotel: Record<string, unknown>) => ({
-      ...hotel,
-      amenities: typeof hotel.amenities === 'string' ? JSON.parse(hotel.amenities) : hotel.amenities || [],
-      vibeTags: typeof hotel.vibeTags === 'string' ? JSON.parse(hotel.vibeTags) : hotel.vibeTags || [],
-      images: typeof hotel.images === 'string' ? JSON.parse(hotel.images) : hotel.images || [],
-      discountRules: typeof hotel.discountRules === 'string' ? JSON.parse(hotel.discountRules) : hotel.discountRules || [],
-    }));
+    // Parse JSON string fields + compute priceFrom for client consumption
+    const parsedHotels = hotels.map((hotel: Record<string, unknown>) => {
+      const roomTypes = hotel.roomTypes as { pricePerNight: number }[] | undefined;
+      const priceFrom = roomTypes && roomTypes.length > 0 ? roomTypes[0].pricePerNight : null;
+      const { roomTypes: _rt, ...rest } = hotel as Record<string, unknown>;
+      return {
+        ...rest,
+        priceFrom,
+        amenities: typeof hotel.amenities === 'string' ? JSON.parse(hotel.amenities as string) : hotel.amenities || [],
+        vibeTags: typeof hotel.vibeTags === 'string' ? JSON.parse(hotel.vibeTags as string) : hotel.vibeTags || [],
+        images: typeof hotel.images === 'string' ? JSON.parse(hotel.images as string) : hotel.images || [],
+        discountRules: typeof hotel.discountRules === 'string' ? JSON.parse(hotel.discountRules as string) : hotel.discountRules || [],
+      };
+    });
 
     return NextResponse.json({
       success: true,

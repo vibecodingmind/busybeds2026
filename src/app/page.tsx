@@ -1,14 +1,18 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCurrency } from '@/context/CurrencyContext';
+import { useAuth } from '@/context/AuthContext';
 import {
   MapPin, Star, Heart, ChevronLeft, ChevronRight,
   Hotel, Castle, Palmtree,
   Home, Building2, Waves, TreePalm, Tent, Mountain, Landmark,
-  Search, SlidersHorizontal
+  Search, LayoutGrid, List, MapIcon,
 } from 'lucide-react';
 import type { Hotel as HotelType } from '@/types';
 import { parseJsonField } from '@/lib/parse';
@@ -16,10 +20,10 @@ import { parseJsonField } from '@/lib/parse';
 const PROPERTY_TYPES = [
   { id: 'hotels', label: 'Hotels', icon: Hotel },
   { id: 'resort', label: 'Resort', icon: Palmtree },
-  { id: 'apartments', label: 'Apartments', icon: Building2 },
-  { id: 'villa', label: 'Villa', icon: Castle },
   { id: 'beachfront', label: 'Beachfront', icon: Waves },
+  { id: 'villa', label: 'Villa', icon: Castle },
   { id: 'safari', label: 'Safari', icon: TreePalm },
+  { id: 'apartments', label: 'Apartments', icon: Building2 },
   { id: 'camping', label: 'Camping', icon: Tent },
   { id: 'mountain', label: 'Mountain', icon: Mountain },
   { id: 'historic', label: 'Historic', icon: Landmark },
@@ -33,13 +37,15 @@ const TIERS = [
   { id: 'luxury', label: 'Luxury' },
 ];
 
-/* ─── Airbnb-style small card ─── */
+/* --- Airbnb-style small card --- */
 function HotelCard({ hotel }: { hotel: HotelType }) {
+  const { formatPrice } = useCurrency();
   const [currentImg, setCurrentImg] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
-  const images = parseJsonField<string[]>(hotel.images);
-  const displayImages = images.length > 0 ? images : hotel.coverImage ? [hotel.coverImage] : [];
+  const images = parseJsonField<string[]>((hotel as any).images);
+  const coverImg = (hotel as any).coverImage;
+  const displayImages = images.length > 0 ? images : coverImg ? [hotel.coverImage] : [];
   const hasMultiple = displayImages.length > 1;
 
   const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
@@ -61,7 +67,7 @@ function HotelCard({ hotel }: { hotel: HotelType }) {
         >
           {displayImages.length > 0 ? (
             <img
-              src={displayImages[currentImg] || hotel.coverImage}
+              src={displayImages[currentImg] || (hotel as any).coverImage}
               alt={hotel.name}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
@@ -128,12 +134,21 @@ function HotelCard({ hotel }: { hotel: HotelType }) {
           <p className="text-[12px] text-gray-500 dark:text-gray-400 truncate mt-0.5">
             <MapPin className="h-3 w-3 inline -mt-0.5 mr-0.5" />{hotel.city}, {hotel.country}
           </p>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <Badge variant="outline" className="text-[9px] px-1 py-0 h-3.5 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400">
-              {hotel.tier}
-            </Badge>
-            {hotel.discountPercent > 0 && (
-              <span className="text-[10px] font-semibold text-[#ea4d60]">-{hotel.discountPercent}%</span>
+          <div className="flex items-center justify-between gap-1 mt-0.5">
+            <div className="flex items-center gap-1.5">
+              <Badge variant="outline" className="text-[9px] px-1 py-0 h-3.5 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-400">
+                {hotel.tier}
+              </Badge>
+              {hotel.discountPercent > 0 && (
+                <span className="text-[10px] font-semibold text-[#ea4d60]">-{hotel.discountPercent}%</span>
+              )}
+            </div>
+            {(hotel as any).priceFrom != null && (
+              <span className="text-[12px] font-bold text-gray-900 dark:text-white">
+                <span className="text-[10px] font-normal text-gray-500 dark:text-gray-400">from </span>
+                {formatPrice((hotel as any).priceFrom)}
+                <span className="text-[10px] font-normal text-gray-400 dark:text-gray-500">/night</span>
+              </span>
             )}
           </div>
         </Link>
@@ -142,7 +157,7 @@ function HotelCard({ hotel }: { hotel: HotelType }) {
   );
 }
 
-/* ─── Skeleton card ─── */
+/* --- Skeleton card --- */
 function CardSkeleton() {
   return (
     <div className="w-full">
@@ -155,12 +170,65 @@ function CardSkeleton() {
   );
 }
 
-/* ─── Main Page ─── */
-export default function HomePage() {
+/* --- Near You floating section --- */
+function NearYouSection() {
+  const [nearbyHotels, setNearbyHotels] = useState<HotelType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { formatPrice } = useCurrency();
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await fetch(`/api/hotels/nearby?lat=${pos.coords.latitude}&lng=${pos.coords.longitude}&limit=6`);
+          if (res.ok) {
+            const data = await res.json();
+            setNearbyHotels(data.data || []);
+          }
+        } catch { } finally { setLoading(false); }
+      },
+      () => { setLoading(false); }
+    );
+  }, []);
+
+  if (!loading && nearbyHotels.length === 0) return null;
+
+  return (
+    <section className="py-4">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8">
+        <div className="flex items-center gap-2 mb-3">
+          <MapPin className="h-5 w-5 text-[#0E5C3B] dark:text-[#10b981]" />
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Near You</h2>
+        </div>
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {Array.from({ length: 6 }).map((_, i) => <CardSkeleton key={i} />)}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {nearbyHotels.map(hotel => <HotelCard key={hotel.id} hotel={hotel} />)}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* --- Home Page Content (uses useSearchParams, must be in Suspense) --- */
+function HomePageContent() {
+  const searchParams = useSearchParams();
+  const isNearby = searchParams.get('nearby') === 'true';
+
   const [allHotels, setAllHotels] = useState<HotelType[]>([]);
   const [loading, setLoading] = useState(true);
   const [activePropertyType, setActivePropertyType] = useState<string | null>(null);
   const [activeTier, setActiveTier] = useState('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
+  const [showToast, setShowToast] = useState(false);
   const categoryScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -191,10 +259,26 @@ export default function HomePage() {
     categoryScrollRef.current.scrollBy({ left: direction === 'left' ? -200 : 200, behavior: 'smooth' });
   };
 
-  return (
-    <div className="min-h-screen bg-white dark:bg-[#0F1117]">
+  const handleViewMode = (mode: 'grid' | 'list' | 'map') => {
+    if (mode === 'grid') {
+      setViewMode('grid');
+    } else {
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2500);
+    }
+  };
 
-      {/* ─── Category filter bar ─── */}
+  return (
+    <div className="min-h-screen bg-white dark:bg-[#0F1117] pb-20 lg:pb-0">
+
+      {/* --- Toast notification --- */}
+      {showToast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 px-4 py-2 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-top-2">
+          Coming soon!
+        </div>
+      )}
+
+      {/* --- Category filter bar --- */}
       <section className="bg-white dark:bg-[#1a1d27] border-b border-gray-100 dark:border-gray-800 sticky top-14 z-30">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-2.5">
           <div className="flex items-center gap-2">
@@ -221,7 +305,7 @@ export default function HomePage() {
 
             {/* Scrollable category pills */}
             <div ref={categoryScrollRef}
-              className="flex items-center gap-1.5 overflow-x-auto scroll-smooth scrollbar-hide flex-1"
+              className="flex items-center gap-1.5 overflow-x-auto scroll-smooth flex-1"
               style={{ scrollbarWidth: 'none' }}>
               {PROPERTY_TYPES.map(pt => (
                 <button key={pt.id}
@@ -241,11 +325,39 @@ export default function HomePage() {
               className="w-6 h-6 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
               <ChevronRight className="h-3 w-3 text-gray-400" />
             </button>
+
+            {/* View mode toggle */}
+            <div className="hidden sm:flex items-center border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shrink-0 ml-1">
+              <button
+                onClick={() => handleViewMode('grid')}
+                className={`p-1.5 transition-colors ${viewMode === 'grid' ? 'bg-[#0E5C3B] text-white' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                title="Grid view"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => handleViewMode('list')}
+                className={`p-1.5 transition-colors ${viewMode === 'list' ? 'bg-[#0E5C3B] text-white' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                title="List view"
+              >
+                <List className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => handleViewMode('map')}
+                className={`p-1.5 transition-colors ${viewMode === 'map' ? 'bg-[#0E5C3B] text-white' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                title="Map view"
+              >
+                <MapIcon className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ─── Hotel grid ─── */}
+      {/* --- Near You section (shown when ?nearby=true) --- */}
+      {isNearby && <NearYouSection />}
+
+      {/* --- Hotel grid --- */}
       <section className="py-5">
         <div className="max-w-[1440px] mx-auto px-4 md:px-8">
 
@@ -256,7 +368,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Airbnb-style grid: up to 7 columns on large screens */}
+          {/* Airbnb-style grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4">
             {loading ? (
               Array.from({ length: 14 }).map((_, i) => <CardSkeleton key={i} />)
@@ -276,8 +388,25 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Bottom spacing for tab bar */}
-      <div className="h-6" />
+      {/* Bottom spacing for mobile tab bar */}
+      <div className="h-6 lg:h-0" />
     </div>
+  );
+}
+
+/* --- Page export with Suspense boundary for useSearchParams --- */
+export default function HomePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white dark:bg-[#0F1117] pb-20 lg:pb-0">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3 sm:gap-4">
+            {Array.from({ length: 14 }).map((_, i) => <CardSkeleton key={i} />)}
+          </div>
+        </div>
+      </div>
+    }>
+      <HomePageContent />
+    </Suspense>
   );
 }
