@@ -58,3 +58,27 @@ Stage Summary:
 - Consistent card-based sections for filters, tables, and lists
 - Deployed to VPS as green slot on port 3001
 - Site verified live at https://busybeds.com
+
+---
+Task ID: 1-6
+Agent: Main Agent
+Task: Complete all 5 platform fixes for BusyBeds (Homepage redesign, Hotels listing fix, Hotel detail polish, Pricing page, Coupons page)
+
+Work Log:
+- Read all current source code from Docker containers and VPS repo
+- Discovered all 20 hotels already have cover images (task #2 was already done)
+- Rewrote homepage with Airbnb-style full-width hero (real Unsplash background), "How It Works" section, improved trust bar, better CTA
+- Fixed Hotels Listing page: fixed otel/hotel typo bug, added collapsible filters, colored tier badges, coupon CTA rows, partner badges
+- Polished Hotel Detail page: fixed const otel syntax bug, added prominent booking sidebar with gradient buttons, Zap icon, hover effects
+- Created /pricing page with 3-tier pricing (Explorer Free, Traveler $4.99, VIP $9.99)
+- Created /coupons page with login prompt, coupon list, copy-to-clipboard, hotel links
+- Updated Footer with /pricing and /coupons links, consistent styling
+- Fixed multiple Python/SFTP file writing issues (escaped backticks, shell glob patterns)
+- Deployed via blue-green: built green container on port 3001, switched nginx, stopped old blue
+- Pushed all changes to GitHub (busybeds2026 repo)
+
+Stage Summary:
+- All 5 priority fixes deployed and live
+- Site responding 200 on all key pages
+- Green container active on port 3001
+- GitHub pushed: feat: homepage redesign, hotels listing fix, hotel detail polish, add pricing & coupons pages
