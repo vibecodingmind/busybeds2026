@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Ticket, Star, Clock, MessageSquare, BarChart3, Edit } from 'lucide-react';
+import { Ticket, Star, Clock, MessageSquare, BarChart3, Edit, Plus, Building2, Hotel } from 'lucide-react';
 
 export default function OwnerDashboardPage() {
   const { user, loading: authLoading } = useAuth();
@@ -26,7 +26,18 @@ export default function OwnerDashboardPage() {
           <h1 className="text-3xl font-bold">Hotel Dashboard</h1>
           <p className="text-muted-foreground">Manage your hotel, coupons, and reviews</p>
         </div>
-        <Link href="/owner/edit"><Button className="bg-emerald hover:bg-emerald/90 text-emerald-foreground"><Edit className="h-4 w-4 mr-2" /> Edit Hotel</Button></Link>
+        <div className="flex gap-2">
+          <Link href="/owner/onboard">
+            <Button className="bg-[#0E5C3B] hover:bg-[#0E5C3B]/90 text-white">
+              <Plus className="h-4 w-4 mr-2" /> Add Hotel
+            </Button>
+          </Link>
+          <Link href="/owner/edit">
+            <Button variant="outline">
+              <Edit className="h-4 w-4 mr-2" /> Edit Hotel
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -57,11 +68,11 @@ export default function OwnerDashboardPage() {
           <h3 className="font-semibold mb-1">Analytics</h3>
           <p className="text-sm text-muted-foreground">View coupon and redemption trends</p>
         </Card>
-        <Link href="/become-host">
-          <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer">
-            <Edit className="h-8 w-8 text-blue-500 mb-3" />
-            <h3 className="font-semibold mb-1">Hotel Profile</h3>
-            <p className="text-sm text-muted-foreground">Update your hotel details and photos</p>
+        <Link href="/owner/onboard">
+          <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer border-2 border-dashed border-[#0E5C3B]/30 dark:border-[#10b981]/30">
+            <Plus className="h-8 w-8 text-[#0E5C3B] dark:text-[#10b981] mb-3" />
+            <h3 className="font-semibold mb-1">Add Another Hotel</h3>
+            <p className="text-sm text-muted-foreground">List a new property on BusyBeds</p>
           </Card>
         </Link>
       </div>
