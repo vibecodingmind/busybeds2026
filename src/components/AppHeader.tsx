@@ -107,7 +107,7 @@ export function AppHeader() {
           </DropdownMenu>
 
           {/* Become a Host — desktop, always visible */}
-          <Link href="/owner/onboard" className="hidden lg:inline-flex">
+          <Link href="/signup" className="hidden lg:inline-flex">
             <Button
               variant="ghost"
               size="sm"
@@ -176,7 +176,7 @@ export function AppHeader() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/owner/onboard" className="flex items-center gap-2 text-[#0E5C3B] dark:text-[#10b981] font-medium">
+                  <Link href="/signup" className="flex items-center gap-2 text-[#0E5C3B] dark:text-[#10b981] font-medium">
                     <Building2 className="h-4 w-4" /> Become a Host
                   </Link>
                 </DropdownMenuItem>
@@ -214,7 +214,7 @@ export function AppHeader() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/register" className="flex items-center gap-2">
+                  <Link href="/signup" className="flex items-center gap-2">
                     <UserPlus className="h-4 w-4" /> Sign up
                   </Link>
                 </DropdownMenuItem>

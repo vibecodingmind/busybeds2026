@@ -104,7 +104,7 @@ export default function LoginPage() {
               </Button>
             </form>
             <div className="mt-4 text-center text-sm text-muted-foreground">
-              Don&apos;t have an account? <Link href="/register" className="text-emerald hover:underline font-medium">Sign up</Link>
+              Don&apos;t have an account? <Link href="/signup" className="text-emerald hover:underline font-medium">Sign up</Link>
             </div>
           </CardContent>
         </Card>

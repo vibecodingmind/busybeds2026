@@ -21,13 +21,13 @@ export default function AffiliatesPage() {
   }, [user, authLoading]);
 
   const copyLink = () => {
-    const link = `${window.location.origin}/register?ref=${data?.referralCode}`;
+    const link = `${window.location.origin}/signup?ref=${data?.referralCode}`;
     navigator.clipboard?.writeText(link);
     toast.success('Referral link copied!');
   };
 
   const shareWhatsApp = () => {
-    const link = `${window.location.origin}/register?ref=${data?.referralCode}`;
+    const link = `${window.location.origin}/signup?ref=${data?.referralCode}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(`Save on hotels with BusyBeds! Use my referral code ${data?.referralCode}: ${link}`)}`);
   };
 
@@ -44,7 +44,7 @@ export default function AffiliatesPage() {
         <CardHeader><CardTitle>Your Referral Link</CardTitle></CardHeader>
         <CardContent>
           <div className="flex gap-2 mb-4">
-            <Input readOnly value={`${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${data?.referralCode || ''}`} className="font-mono text-sm" />
+            <Input readOnly value={`${typeof window !== 'undefined' ? window.location.origin : ''}/signup?ref=${data?.referralCode || ''}`} className="font-mono text-sm" />
             <Button onClick={copyLink}><Copy className="h-4 w-4" /></Button>
           </div>
           <div className="flex gap-2">

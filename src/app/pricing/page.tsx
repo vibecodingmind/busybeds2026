@@ -18,7 +18,7 @@ const PLANS = [
       'Community reviews access',
     ],
     cta: 'Get Started',
-    href: '/register',
+    href: '/signup',
     popular: false,
     icon: Star,
     color: 'gray',

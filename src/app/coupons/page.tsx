@@ -74,7 +74,7 @@ export default function CouponsPage() {
               <Link href="/login">
                 <Button variant="outline" className="rounded-xl h-11 px-6">Log in</Button>
               </Link>
-              <Link href="/register">
+              <Link href="/signup">
                 <Button className="bg-[#0E5C3B] hover:bg-[#0a4d31] dark:bg-[#10b981] dark:hover:bg-[#059669] text-white rounded-xl h-11 px-6">Sign up free</Button>
               </Link>
             </div>

@@ -13,14 +13,11 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import {
   Building2, ArrowRight, ArrowLeft, Check, Search, Star,
-  MapPin, Hotel, Waves, TreePalm, Castle, Tent, Mountain, Home,
-  Sparkles, Shield, TrendingUp, Users, Globe, ChevronRight,
-  LogIn, UserPlus, Eye, EyeOff, Mail, Lock, User,
-  Compass, Ticket, Heart,
+  MapPin, Hotel, Sparkles, ChevronRight,
 } from 'lucide-react';
 import { HOTEL_TYPES, VIBE_TAGS, COUNTRIES, CITIES } from '@/lib/locations';
 
-type Step = 'auth' | 'welcome' | 'select' | 'details' | 'discount' | 'review' | 'success';
+type Step = 'welcome' | 'select' | 'details' | 'discount' | 'review' | 'success';
 
 interface AvailableHotel {
   id: string;
@@ -34,316 +31,9 @@ interface AvailableHotel {
 }
 
 /* ================================================================
-   AUTH STEP — Inline Login / Register with Host / Guest choice
+   WELCOME STEP - Choose: Claim existing hotel or Add new
    ================================================================ */
-function AuthStep({ onAuthenticated }: { onAuthenticated: (asHost: boolean) => void }) {
-  const { login, register, refreshUser } = useAuth();
-  const [mode, setMode] = useState<'choose' | 'login' | 'register'>('choose');
-  const [registerRole, setRegisterRole] = useState<'owner' | 'traveler'>('owner');
-  const [submitting, setSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-
-  // Login form
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-
-  // Register form
-  const [regName, setRegName] = useState('');
-  const [regEmail, setRegEmail] = useState('');
-  const [regPassword, setRegPassword] = useState('');
-
-  const handleLogin = async () => {
-    if (!loginEmail || !loginPassword) { toast.error('Please fill in all fields'); return; }
-    setSubmitting(true);
-    const result = await login(loginEmail, loginPassword);
-    setSubmitting(false);
-    if (result.success) {
-      await refreshUser();
-      // Check user role - if owner, they already have a hotel setup
-      onAuthenticated(true);
-    } else {
-      toast.error(result.error || 'Login failed');
-    }
-  };
-
-  const handleRegister = async () => {
-    if (!regName || !regEmail || !regPassword) { toast.error('Please fill in all fields'); return; }
-    if (regPassword.length < 6) { toast.error('Password must be at least 6 characters'); return; }
-    setSubmitting(true);
-    const result = await register({
-      email: regEmail,
-      password: regPassword,
-      fullName: regName,
-      role: registerRole,
-    });
-    setSubmitting(false);
-    if (result.success) {
-      await refreshUser();
-      onAuthenticated(registerRole === 'owner');
-    } else {
-      toast.error(result.error || 'Registration failed');
-    }
-  };
-
-  return (
-    <div className="max-w-md mx-auto px-4 py-8">
-      {/* === CHOOSE: Host or Guest === */}
-      {mode === 'choose' && (
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-[#0E5C3B]/10 dark:bg-[#10b981]/10 flex items-center justify-center mx-auto mb-4">
-            <Building2 className="h-8 w-8 text-[#0E5C3B] dark:text-[#10b981]" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            Become a Host on BusyBeds
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-8">
-            Join thousands of hotel owners offering exclusive discounts to travelers across Africa
-          </p>
-
-          {/* Benefits */}
-          <div className="grid grid-cols-3 gap-3 mb-8">
-            {[
-              { icon: TrendingUp, title: 'More Bookings' },
-              { icon: Shield, title: 'Trusted Platform' },
-              { icon: Users, title: 'Loyal Guests' },
-            ].map(b => (
-              <div key={b.title} className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
-                <b.icon className="h-5 w-5 text-[#0E5C3B] dark:text-[#10b981] mx-auto mb-1" />
-                <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400">{b.title}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Role choice cards */}
-          <div className="space-y-3">
-            <button
-              onClick={() => { setRegisterRole('owner'); setMode('register'); }}
-              className="group w-full p-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-[#0E5C3B] dark:hover:border-[#10b981] bg-white dark:bg-gray-900 text-left transition-all hover:shadow-lg"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#0E5C3B]/10 dark:bg-[#10b981]/10 flex items-center justify-center shrink-0">
-                  <Building2 className="h-6 w-6 text-[#0E5C3B] dark:text-[#10b981]" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">I own a hotel</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">List your hotel, offer discounts, manage bookings</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-[#0E5C3B] dark:group-hover:text-[#10b981] shrink-0 group-hover:translate-x-1 transition-all" />
-              </div>
-            </button>
-
-            <button
-              onClick={() => { setRegisterRole('traveler'); setMode('register'); }}
-              className="group w-full p-5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-[#C8932A] dark:hover:border-[#C8932A] bg-white dark:bg-gray-900 text-left transition-all hover:shadow-lg"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[#C8932A]/10 flex items-center justify-center shrink-0">
-                  <Compass className="h-6 w-6 text-[#C8932A]" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">I want hotel deals</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Find exclusive discount coupons for hotels across Africa</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-300 group-hover:text-[#C8932A] shrink-0 group-hover:translate-x-1 transition-all" />
-              </div>
-            </button>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Already have an account?{' '}
-              <button onClick={() => setMode('login')} className="text-[#0E5C3B] dark:text-[#10b981] font-semibold hover:underline">
-                Log in
-              </button>
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* === REGISTER FORM === */}
-      {mode === 'register' && (
-        <div>
-          <div className="text-center mb-6">
-            <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${registerRole === 'owner' ? 'bg-[#0E5C3B]/10 dark:bg-[#10b981]/10' : 'bg-[#C8932A]/10'}`}>
-              {registerRole === 'owner' ? (
-                <Building2 className={`h-6 w-6 ${registerRole === 'owner' ? 'text-[#0E5C3B] dark:text-[#10b981]' : 'text-[#C8932A]'}`} />
-              ) : (
-                <Compass className="h-6 w-6 text-[#C8932A]" />
-              )}
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              {registerRole === 'owner' ? 'Create your Host account' : 'Create your account'}
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {registerRole === 'owner' ? 'Start listing your hotel in minutes' : 'Find the best hotel deals across Africa'}
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">Full Name</Label>
-              <div className="relative mt-1.5">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  value={regName}
-                  onChange={e => setRegName(e.target.value)}
-                  placeholder="Your full name"
-                  className="pl-10 h-11"
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Email</Label>
-              <div className="relative mt-1.5">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="email"
-                  value={regEmail}
-                  onChange={e => setRegEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-10 h-11"
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Password</Label>
-              <div className="relative mt-1.5">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={regPassword}
-                  onChange={e => setRegPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  className="pl-10 pr-10 h-11"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleRegister}
-              disabled={submitting}
-              className={`w-full h-11 text-white font-semibold ${registerRole === 'owner' ? 'bg-[#0E5C3B] hover:bg-[#0E5C3B]/90' : 'bg-[#C8932A] hover:bg-[#C8932A]/90'}`}
-            >
-              {submitting ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating account...
-                </div>
-              ) : (
-                <>
-                  {registerRole === 'owner' ? 'Create Host Account' : 'Create Account'}
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </>
-              )}
-            </Button>
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Already have an account?{' '}
-              <button onClick={() => setMode('login')} className="text-[#0E5C3B] dark:text-[#10b981] font-semibold hover:underline">
-                Log in
-              </button>
-            </p>
-          </div>
-
-          <button
-            onClick={() => setMode('choose')}
-            className="mt-2 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex items-center gap-1 mx-auto"
-          >
-            <ArrowLeft className="h-3 w-3" /> Back
-          </button>
-        </div>
-      )}
-
-      {/* === LOGIN FORM === */}
-      {mode === 'login' && (
-        <div>
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-xl bg-[#0E5C3B]/10 dark:bg-[#10b981]/10 flex items-center justify-center mx-auto mb-3">
-              <LogIn className="h-6 w-6 text-[#0E5C3B] dark:text-[#10b981]" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Welcome back</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Log in to continue your host setup</p>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">Email</Label>
-              <div className="relative mt-1.5">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="email"
-                  value={loginEmail}
-                  onChange={e => setLoginEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="pl-10 h-11"
-                />
-              </div>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Password</Label>
-              <div className="relative mt-1.5">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={loginPassword}
-                  onChange={e => setLoginPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="pl-10 pr-10 h-11"
-                  onKeyDown={e => { if (e.key === 'Enter') handleLogin(); }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleLogin}
-              disabled={submitting}
-              className="w-full h-11 bg-[#0E5C3B] hover:bg-[#0E5C3B]/90 text-white font-semibold"
-            >
-              {submitting ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Logging in...
-                </div>
-              ) : (
-                <>Log In <ArrowRight className="h-4 w-4 ml-2" /></>
-              )}
-            </Button>
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Don&apos;t have an account?{' '}
-              <button onClick={() => setMode('choose')} className="text-[#0E5C3B] dark:text-[#10b981] font-semibold hover:underline">
-                Sign up
-              </button>
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ================================================================
-   WELCOME STEP — Choose: Claim existing hotel or Add new
-   ================================================================ */
-function WelcomeStep({ onPath }: { onPath: (path: 'select' | 'create') => void }) {
+function WelcomeStep({ onPath, onSkip }: { onPath: (path: 'select' | 'create') => void; onSkip: () => void }) {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="text-center mb-8">
@@ -389,15 +79,17 @@ function WelcomeStep({ onPath }: { onPath: (path: 'select' | 'create') => void }
         </button>
       </div>
 
-      <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
-        You can skip this step and add a hotel later from your dashboard.
-      </p>
+      <div className="text-center mt-6">
+        <button onClick={onSkip} className="text-sm text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 underline">
+          Skip for now, add a hotel later from dashboard
+        </button>
+      </div>
     </div>
   );
 }
 
 /* ================================================================
-   SELECT HOTEL STEP — Search & select existing hotel to claim
+   SELECT HOTEL STEP - Search & select existing hotel to claim
    ================================================================ */
 function SelectHotelStep({ onSelect, onBack }: { onSelect: (hotel: AvailableHotel) => void; onBack: () => void }) {
   const [hotels, setHotels] = useState<AvailableHotel[]>([]);
@@ -500,7 +192,7 @@ function SelectHotelStep({ onSelect, onBack }: { onSelect: (hotel: AvailableHote
 }
 
 /* ================================================================
-   HOTEL DETAILS STEP — for creating a new hotel
+   HOTEL DETAILS STEP - for creating a new hotel
    ================================================================ */
 function HotelDetailsStep({ form, setForm, onNext, onBack }: {
   form: any; setForm: (f: any) => void; onNext: () => void; onBack: () => void;
@@ -586,7 +278,7 @@ function HotelDetailsStep({ form, setForm, onNext, onBack }: {
 }
 
 /* ================================================================
-   DISCOUNT STEP — Set discount & vibes
+   DISCOUNT STEP - Set discount & vibes
    ================================================================ */
 function DiscountStep({ form, setForm, onNext, onBack }: {
   form: any; setForm: (f: any) => void; onNext: () => void; onBack: () => void;
@@ -726,76 +418,50 @@ function ReviewStep({ form, selectedHotel, isClaiming, onBack, onSubmit }: {
 /* ================================================================
    SUCCESS STEP
    ================================================================ */
-function SuccessStep({ isClaiming, isGuest }: { isClaiming: boolean; isGuest: boolean }) {
+function SuccessStep({ isClaiming }: { isClaiming: boolean }) {
   return (
     <div className="max-w-lg mx-auto px-4 py-16 text-center">
       <div className="w-20 h-20 rounded-full bg-[#0E5C3B]/10 dark:bg-[#10b981]/10 flex items-center justify-center mx-auto mb-6">
         <Check className="h-10 w-10 text-[#0E5C3B] dark:text-[#10b981]" />
       </div>
-      {isGuest ? (
-        <>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">Welcome to BusyBeds!</h2>
-          <p className="text-gray-500 dark:text-gray-400 text-lg mb-8">Your account is ready. Start exploring hotel deals across Africa.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/"><Button className="bg-[#0E5C3B] hover:bg-[#0E5C3B]/90 text-white">Explore Hotels</Button></Link>
-            <Link href="/owner/onboard"><Button variant="outline">List Your Hotel</Button></Link>
-          </div>
-        </>
-      ) : (
-        <>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-            {isClaiming ? 'Claim Submitted!' : 'Application Submitted!'}
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 text-lg mb-8">
-            {isClaiming ? 'We\'re verifying your hotel ownership. You\'ll be notified once approved.' : 'Your hotel listing is being reviewed. You can add more hotels from your dashboard.'}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/owner/dashboard"><Button className="bg-[#0E5C3B] hover:bg-[#0E5C3B]/90 text-white">Go to Dashboard</Button></Link>
-            <Link href="/"><Button variant="outline">Back to Home</Button></Link>
-          </div>
-        </>
-      )}
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
+        {isClaiming ? 'Claim Submitted!' : 'Application Submitted!'}
+      </h2>
+      <p className="text-gray-500 dark:text-gray-400 text-lg mb-8">
+        {isClaiming ? 'We are verifying your hotel ownership. You will be notified once approved.' : 'Your hotel listing is being reviewed. You can add more hotels from your dashboard.'}
+      </p>
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+        <Link href="/owner/dashboard"><Button className="bg-[#0E5C3B] hover:bg-[#0E5C3B]/90 text-white">Go to Dashboard</Button></Link>
+        <Link href="/"><Button variant="outline">Back to Home</Button></Link>
+      </div>
     </div>
   );
 }
 
 /* ================================================================
-   MAIN ONBOARDING PAGE
+   MAIN ONBOARDING PAGE - Auth required, starts at Welcome
    ================================================================ */
 export default function OwnerOnboardPage() {
-  const { user, loading: authLoading, refreshUser } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [step, setStep] = useState<Step>('auth');
+  const [step, setStep] = useState<Step>('welcome');
   const [path, setPath] = useState<'select' | 'create' | null>(null);
   const [selectedHotel, setSelectedHotel] = useState<AvailableHotel | null>(null);
-  const [isGuest, setIsGuest] = useState(false);
   const [form, setForm] = useState({
     hotelName: '', city: '', country: 'Tanzania', category: 'Hotel',
     descriptionShort: '', descriptionLong: '', starRating: 3, discountPercent: 15,
     couponValidDays: 30, amenities: [] as string[], vibeTags: [] as string[],
   });
 
-  // If user is already logged in, skip auth step
+  // Redirect to signup if not authenticated
   useEffect(() => {
-    if (!authLoading && user) {
-      if (step === 'auth') {
-        if (user.role === 'owner') {
-          setStep('welcome');
-        } else {
-          setStep('welcome');
-        }
-      }
+    if (!authLoading && !user) {
+      router.push('/signup');
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, router]);
 
-  const handleAuthenticated = (asHost: boolean) => {
-    if (asHost) {
-      setStep('welcome');
-    } else {
-      // Guest user — show success with explore option
-      setIsGuest(true);
-      setStep('success');
-    }
+  const handleSkip = () => {
+    router.push('/owner/dashboard');
   };
 
   const handleSubmit = async () => {
@@ -823,18 +489,29 @@ export default function OwnerOnboardPage() {
   };
 
   // Progress calculation
-  const steps = ['auth', 'welcome', path === 'select' ? 'select' : 'details', 'discount', 'review', 'success'];
+  const steps: Step[] = ['welcome', path === 'select' ? 'select' : 'details', 'discount', 'review', 'success'];
   const currentIdx = steps.indexOf(step);
-  const progress = step === 'success' ? 100 : user ? Math.max(0, ((currentIdx - 1) / 3) * 100) : (currentIdx / 4) * 100;
+  const progress = step === 'success' ? 100 : (currentIdx / 4) * 100;
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#0E5C3B]/30 border-t-[#0E5C3B] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) return null; // Will redirect via useEffect
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0F1117]">
       {/* Progress bar */}
-      {step !== 'auth' && step !== 'success' && (
+      {step !== 'success' && (
         <div className="sticky top-14 z-20 bg-white dark:bg-[#0F1117] border-b border-gray-100 dark:border-gray-800">
           <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
             <button onClick={() => {
-              if (step === 'welcome') setStep('auth');
+              if (step === 'welcome') router.push('/owner/dashboard');
               else if (step === 'select' || step === 'details') setStep('welcome');
               else if (step === 'discount') setStep(path === 'select' ? 'select' : 'details');
               else if (step === 'review') setStep('discount');
@@ -849,13 +526,13 @@ export default function OwnerOnboardPage() {
       )}
 
       {/* Step content */}
-      {step === 'auth' && <AuthStep onAuthenticated={handleAuthenticated} />}
-      {step === 'welcome' && <WelcomeStep onPath={(p) => { setPath(p); setStep(p === 'select' ? 'select' : 'details'); }} />}
+      {step === 'welcome' && <WelcomeStep onPath={(p) => { setPath(p); setStep(p === 'select' ? 'select' : 'details'); }} onSkip={handleSkip} />}
       {step === 'select' && <SelectHotelStep onSelect={(h) => { setSelectedHotel(h); setStep('discount'); }} onBack={() => setStep('welcome')} />}
       {step === 'details' && <HotelDetailsStep form={form} setForm={setForm} onNext={() => setStep('discount')} onBack={() => setStep('welcome')} />}
       {step === 'discount' && <DiscountStep form={form} setForm={setForm} onNext={() => setStep('review')} onBack={() => setStep(path === 'select' ? 'select' : 'details')} />}
       {step === 'review' && <ReviewStep form={form} selectedHotel={selectedHotel} isClaiming={path === 'select'} onBack={() => setStep('discount')} onSubmit={handleSubmit} />}
-      {step === 'success' && <SuccessStep isClaiming={path === 'select'} isGuest={isGuest} />}
+      {step === 'success' && <SuccessStep isClaiming={path === 'select'} />}
     </div>
   );
 }
+

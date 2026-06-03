@@ -29,14 +29,14 @@ export default function ReferralsPage() {
 
   const copyCode = () => {
     if (!data?.referralCode) return;
-    const url = `${window.location.origin}/register?ref=${data.referralCode}`;
+    const url = `${window.location.origin}/signup?ref=${data.referralCode}`;
     navigator.clipboard.writeText(url);
     toast.success('Referral link copied!');
   };
 
   const shareCode = async () => {
     if (!data?.referralCode) return;
-    const url = `${window.location.origin}/register?ref=${data.referralCode}`;
+    const url = `${window.location.origin}/signup?ref=${data.referralCode}`;
     if (navigator.share) {
       navigator.share({ title: 'Join BusyBeds!', text: `Get hotel discounts with BusyBeds. Use my referral code: ${data.referralCode}`, url });
     } else copyCode();
