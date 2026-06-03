@@ -7,6 +7,7 @@ import { CurrencyProvider } from "@/context/CurrencyContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { ThemeProvider } from "next-themes";
 import { LayoutProvider } from "@/context/LayoutContext";
+import { SWRProvider } from "@/context/SWRProvider";
 import { LayoutContentWrapper } from "@/components/LayoutContentWrapper";
 
 const geistSans = Geist({
@@ -86,10 +87,12 @@ export default function RootLayout({
             <CurrencyProvider>
               <NotificationProvider>
                 <LayoutProvider>
+                  <SWRProvider>
                   <LayoutContentWrapper>
                     {children}
                   </LayoutContentWrapper>
                   <Toaster richColors position="top-center" />
+                  </SWRProvider>
                 </LayoutProvider>
               </NotificationProvider>
             </CurrencyProvider>

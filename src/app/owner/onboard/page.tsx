@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { refreshHotels } from '@/lib/useApi';
 import {
   Building2, ArrowRight, ArrowLeft, Check, Search, Star,
   MapPin, Hotel, Sparkles, ChevronRight,
@@ -473,7 +474,7 @@ export default function OwnerOnboardPage() {
           body: JSON.stringify({ action: 'claim', hotelId: selectedHotel.id, discountPercent: form.discountPercent, couponValidDays: form.couponValidDays || 30 }),
         });
         const data = await res.json();
-        if (data.success) { setStep('success'); } else { toast.error(data.error || 'Failed to claim hotel'); }
+        if (data.success) { refreshHotels(); setStep('success'); } else { toast.error(data.error || 'Failed to claim hotel'); }
       } else {
         const res = await fetch('/api/owner/onboard', {
           method: 'POST',
@@ -481,7 +482,7 @@ export default function OwnerOnboardPage() {
           body: JSON.stringify({ action: 'create', ...form }),
         });
         const data = await res.json();
-        if (data.success) { setStep('success'); } else { toast.error(data.error || 'Failed to submit'); }
+        if (data.success) { refreshHotels(); setStep('success'); } else { toast.error(data.error || 'Failed to submit'); }
       }
     } catch {
       toast.error('Something went wrong. Please try again.');

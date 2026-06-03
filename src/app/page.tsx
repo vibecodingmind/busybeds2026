@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, Suspense, useCallback } from 'react';
+import { useHotels } from '@/lib/useApi';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -378,15 +379,11 @@ function HomePageContent() {
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
   const categoryScrollRef = useRef<HTMLDivElement>(null);
 
+  // SWR auto-refreshes hotels every 30s + on focus/reconnect
+  const { data: swrHotels, isLoading: swrLoading, refresh: refreshHotels } = useHotels('limit=50&sort=createdAt');
   useEffect(() => {
-    async function fetchHotels() {
-      try {
-        const res = await fetch('/api/hotels?limit=50&sort=createdAt');
-        if (res.ok) { const data = await res.json(); setAllHotels(data.data || []); }
-      } catch {} finally { setLoading(false); }
-    }
-    fetchHotels();
-  }, []);
+    if (swrHotels) { setAllHotels(swrHotels); setLoading(false); }
+  }, [swrHotels]);
 
   const filterByTier = (hotels: HotelType[]) => {
     if (activeTier === 'all') return hotels;

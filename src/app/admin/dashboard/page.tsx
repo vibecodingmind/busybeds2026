@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAdminAnalytics, refreshKey } from '@/lib/useApi';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Building2, Ticket, DollarSign, TrendingUp, TrendingDown, Handshake, MapPin } from 'lucide-react';
@@ -12,9 +13,9 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch('/api/admin/analytics').then(r => r.json()).then(d => { setStats(d.data); setLoading(false); });
-  }, []);
+  // SWR auto-refreshes analytics every 30s + on focus/reconnect
+  const { data: swrStats, isLoading: swrLoading } = useAdminAnalytics();
+  useEffect(() => { if (swrStats) { setStats(swrStats); setLoading(false); } }, [swrStats]);
 
   const statCards = [
     { label: 'Total Users', value: (stats?.totalUsers || 0).toLocaleString(), icon: Users, color: 'bg-blue-500', change: '+12%', up: true },

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { refreshHotels } from '@/lib/useApi';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,9 @@ export default function HotelsPage() {
         }
       } catch {} finally { setLoading(false); }
     }
+    // Auto-refresh every 30s
+    const interval = setInterval(() => fetchHotels(), 30000);
+    return () => clearInterval(interval);
     fetchHotels();
   }, [filters, page]);
 

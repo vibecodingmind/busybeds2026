@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useHostStats, refreshHostData } from '@/lib/useApi';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +13,10 @@ import { Ticket, Star, Clock, MessageSquare, BarChart3, Edit, Plus, Building2, H
 export default function OwnerDashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState<any>(null);
+  const { data: stats, refresh: refreshStats } = useHostStats();
 
   useEffect(() => {
     if (!authLoading && (!user || !['owner', 'manager'].includes(user.role))) { router.push('/'); return; }
-    if (user) fetch('/api/host/stats').then(r => r.json()).then(d => setStats(d.data));
   }, [user, authLoading]);
 
   return (
