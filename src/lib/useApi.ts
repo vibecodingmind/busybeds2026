@@ -1,7 +1,10 @@
 import useSWR, { mutate } from 'swr';
 
-// Generic fetcher
-const fetcher = (url: string) => fetch(url).then(r => r.json()).then(d => d.data ?? d);
+// Generic fetcher — always bust browser/CDN cache
+const fetcher = (url: string) =>
+  fetch(url, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+    .then(r => r.json())
+    .then(d => d.data ?? d);
 
 // SWR global config defaults
 export const SWR_CONFIG = {

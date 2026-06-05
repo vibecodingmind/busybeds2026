@@ -3,6 +3,10 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
+// Force dynamic rendering — never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const createHotelSchema = z.object({
   name: z.string().min(1, 'Hotel name is required'),
   city: z.string().min(1, 'City is required'),

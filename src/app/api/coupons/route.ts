@@ -12,6 +12,10 @@ import { convertUsdToTzs } from '@/lib/currency';
 import { sendEmail, generateCouponEmail } from '@/lib/email';
 import { createNotification } from '@/lib/notifications';
 
+// Force dynamic rendering — never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const createCouponSchema = z.object({
   hotelId: z.string().min(1, 'Hotel ID is required'),
   checkIn: z.string().optional(),

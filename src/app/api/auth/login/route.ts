@@ -4,6 +4,10 @@ import { db } from '@/lib/db'
 import { comparePassword, signToken } from '@/lib/auth'
 import { verifyRecaptcha } from '@/lib/recaptcha'
 
+// Force dynamic rendering — never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const TOKEN_NAME = 'busybeds-token'
 
 const loginSchema = z.object({

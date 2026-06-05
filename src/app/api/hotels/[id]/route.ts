@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
+// Force dynamic rendering — never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function getHotelByIdOrSlug(idOrSlug: string) {
   let hotel = await db.hotel.findUnique({ where: { slug: idOrSlug } });
   if (!hotel) hotel = await db.hotel.findUnique({ where: { id: idOrSlug } });

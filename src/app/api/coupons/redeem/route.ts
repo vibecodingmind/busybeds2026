@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+// Force dynamic rendering — never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Simple in-memory rate limiter
 const redeemAttempts = new Map<string, { count: number; lastReset: number }>();
 const WINDOW_MS = 60_000;

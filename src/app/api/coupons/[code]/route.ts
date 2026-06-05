@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
+// Force dynamic rendering — never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // GET /api/coupons/[code] - Find coupon by code (for redemption portal)
 export async function GET(
   request: NextRequest,

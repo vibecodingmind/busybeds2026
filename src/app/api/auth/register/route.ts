@@ -5,6 +5,10 @@ import { hashPassword, generateReferralCode, signToken } from '@/lib/auth'
 import { sendEmail, generateVerifyEmail } from '@/lib/email'
 import { v4 as uuidv4 } from 'uuid'
 
+// Force dynamic rendering — never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const registerSchema = z.object({
   email: z.email(),
   password: z.string().min(6, 'Password must be at least 6 characters'),

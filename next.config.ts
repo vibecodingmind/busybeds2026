@@ -18,6 +18,21 @@ const nextConfig: NextConfig = {
           { key: 'Content-Type', value: 'application/manifest+json' },
         ],
       },
+      // API routes: never cache — always return fresh data
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+        ],
+      },
+      // Static assets: cache forever (content-hashed filenames)
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
     ];
   },
 };

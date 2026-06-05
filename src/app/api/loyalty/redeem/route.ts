@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
+// Force dynamic rendering — never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const REWARDS: Record<string, { points: number; description: string }> = {
   '1_week_basic': { points: 500, description: '1 free week on Basic plan' },
   '1_month_basic': { points: 1500, description: '1 free month on Basic plan' },
